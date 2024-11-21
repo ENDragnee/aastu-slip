@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+
 import {
   Card,
   CardContent,
@@ -113,7 +114,7 @@ export default function ProctorsDashboard() {
               <CardDescription>Student ID: {selectedStudent.id}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Exit Date: {selectedStudent.exitDate}</p>
+              <p className="mb-4">Requested Date: {selectedStudent.exitDate}</p>
               <h3 className="font-semibold mb-2">Items to Take Home:</h3>
               <ScrollArea className="h-[200px] rounded-md border p-4">
                 <ul className="space-y-2">

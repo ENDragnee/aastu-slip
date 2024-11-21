@@ -8,11 +8,38 @@ export default function StudentItemManagement() {
   const [searchShortcode, setSearchShortcode] = useState('')
   const [searchStudentId, setSearchStudentId] = useState('')
   const [showSummary, setShowSummary] = useState(false)
+  const [studentData, setStudentData] = useState(null)
+  const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSearch = () => {
-    // Here you would typically fetch data based on shortcode and student ID
-    // For this example, we'll just show a mock summary
-    setShowSummary(true)
+  const handleSearch = async () => {
+    if (!searchShortcode && !searchStudentId) {
+      setError("Please enter either a shortcode or student ID");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/gateway?shortcode=${searchShortcode}&studentId=${searchStudentId}`
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to fetch student data');
+      }
+
+      const data = await response.json();
+      setStudentData(data);
+      setShowSummary(true);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error fetching student data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -26,7 +53,6 @@ export default function StudentItemManagement() {
         Student Item Management System
       </motion.h1>
 
-      {/* Search Section */}
       <motion.div 
         className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full max-w-2xl"
         initial={{ opacity: 0, y: 20 }}
@@ -55,14 +81,27 @@ export default function StudentItemManagement() {
         </div>
         <button
           onClick={handleSearch}
-          className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          disabled={isLoading}
+          className={`w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          Search
+          {isLoading ? 'Searching...' : 'Search'}
         </button>
       </motion.div>
 
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 text-red-400 bg-red-900 bg-opacity-50 rounded-lg p-3"
+        >
+          {error}
+        </motion.div>
+      )}
+
       <AnimatePresence>
-        {showSummary && (
+        {showSummary && studentData && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -84,12 +123,12 @@ export default function StudentItemManagement() {
               </button>
               <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Summary</h2>
               <div className="space-y-4">
-                <p><strong className="text-blue-400">Name:</strong> John Doe</p>
-                <p><strong className="text-blue-400">Student ID:</strong> 12345</p>
-                <p><strong className="text-blue-400">Exit Date:</strong> 2023-05-15</p>
+                <p><strong className="text-blue-400">Name:</strong> {studentData.name}</p>
+                <p><strong className="text-blue-400">Student ID:</strong> {studentData.studentId}</p>
+                <p><strong className="text-blue-400">Exit Date:</strong> {new Date(studentData.exitDate).toLocaleDateString()}</p>
                 <h3 className="text-xl font-bold mt-6 mb-4 text-purple-400">Items:</h3>
                 <ul className="space-y-2">
-                  {['Clothing: 2', 'Shoes: 1', 'Books: 3'].map((item, index) => (
+                  {studentData.items.map((item, index) => (
                     <motion.li
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
@@ -97,8 +136,8 @@ export default function StudentItemManagement() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="bg-gray-700 rounded-lg p-3 flex justify-between items-center"
                     >
-                      <span>{item.split(':')[0]}</span>
-                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">{item.split(':')[1]}</span>
+                      <span>{item.itemName}</span>
+                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">{item.count}</span>
                     </motion.li>
                   ))}
                 </ul>
@@ -110,4 +149,3 @@ export default function StudentItemManagement() {
     </div>
   )
 }
-

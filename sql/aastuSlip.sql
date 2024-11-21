@@ -26,13 +26,50 @@ DROP TABLE IF EXISTS `Exits`;
 CREATE TABLE `Exits` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `StudentId` varchar(255) NOT NULL,
-  `Gate` varchar(255) NOT NULL,
-  `Block` varchar(255) NOT NULL,
-  `ExitDate` date NOT NULL,
-  `ApprovalDate` date NOT NULL,
+  `ExitDate` datetime DEFAULT current_timestamp(),
+  `ApprovalDate` datetime DEFAULT current_timestamp(),
   `ShortCode` varchar(255) NOT NULL,
-  PRIMARY KEY (`ID`)
+  `ExitedBy` int(11) DEFAULT NULL,
+  `ApprovedBy` int(11) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `ExitedBy` (`ExitedBy`),
+  KEY `ApprovedBy` (`ApprovedBy`),
+  CONSTRAINT `Exits_ibfk_1` FOREIGN KEY (`ExitedBy`) REFERENCES `GateUsers` (`id`),
+  CONSTRAINT `Exits_ibfk_2` FOREIGN KEY (`ApprovedBy`) REFERENCES `Proctors` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `GateUsers`
+--
+
+DROP TABLE IF EXISTS `GateUsers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `GateUsers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `gate` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `Proctors`
+--
+
+DROP TABLE IF EXISTS `Proctors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Proctors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,10 +85,10 @@ CREATE TABLE `Requests` (
   `Name` varchar(255) NOT NULL,
   `Dorm` int(11) NOT NULL,
   `Block` varchar(255) NOT NULL,
-  `DateOfRequest` date NOT NULL,
+  `DateOfRequest` datetime DEFAULT current_timestamp(),
   `Items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`Items`)),
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,4 +104,4 @@ CREATE TABLE `Requests` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-11-21 11:50:35
+-- Dump completed on 2024-11-21 16:35:36
