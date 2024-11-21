@@ -1,4 +1,4 @@
-// app/api/student-items/route.js
+// app/api/gate/route.js
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 

@@ -42,6 +42,36 @@ export default function StudentItemManagement() {
     }
   }
 
+  const handleFinish = async () => {
+    if (!studentData?.studentId) return;
+  
+    try {
+      const response = await fetch('/api/finish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: studentData.studentId,
+        }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to finish the request');
+      }
+  
+      // Close the modal and reset the data
+      setShowSummary(false);
+      setStudentData(null);
+      setSearchShortcode('');
+      setSearchStudentId('');
+    } catch (error) {
+      setError(error.message);
+      console.error('Error finishing request:', error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 font-sans flex flex-col items-center justify-center">
       <motion.h1 
@@ -142,6 +172,12 @@ export default function StudentItemManagement() {
                   ))}
                 </ul>
               </div>
+              <button
+                onClick={handleFinish}
+                className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              >
+                Finish
+              </button>
             </motion.div>
           </motion.div>
         )}
