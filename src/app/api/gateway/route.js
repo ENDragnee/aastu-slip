@@ -1,79 +1,67 @@
-// app/api/student-items/route.js
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 
-export async function GET(request) {
+export async function POST(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const shortcode = searchParams.get('shortcode') || '';
-    const studentId = searchParams.get('studentId') || '';
+    const body = await request.json();
+    const { username, password } = body;
 
     const query = `
-      SELECT 
-        r.StudentId,
-        r.Name,
-        e.ShortCode,
-        e.ExitDate,
-        r.Items
-      FROM 
-        Requests r
-      LEFT JOIN 
-        Exits e ON r.StudentId = e.StudentId
-      WHERE 
-        (? = '' OR e.ShortCode = ?)
-        AND
-        (? = '' OR r.StudentId = ?)
-      GROUP BY 
-        r.StudentId,
-        r.Name,
-        e.ShortCode,
-        e.ExitDate,
-        r.Items
+      SELECT id, gate 
+      FROM GateUsers 
+      WHERE username = ? AND password = ?
       LIMIT 1
     `;
 
-    const [rows] = await db.execute(query, [shortcode, shortcode, studentId, studentId]);
-
-    if (!rows || rows.length === 0) {
+    let rows = []; // Declare rows outside the inner try block
+    try {
+      const [result] = await db.execute(query, [username, password]);
+      rows = result; // Assign result to rows
+    } catch (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { message: 'No student found' },
-        { status: 404 }
+        { message: 'Database query failed', error: dbError.message },
+        { status: 500 }
       );
     }
 
-    // Parse the JSON Items field
-    const items = JSON.parse(rows[0].Items || '[]');
-    
-    // Count items frequency
-    const itemCounts = items.reduce((acc, item) => {
-      acc[item] = (acc[item] || 0) + 1;
-      return acc;
-    }, {});
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { message: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
 
-    // Format the response
-    const studentInfo = {
-      name: rows[0].Name,
-      studentId: rows[0].StudentId,
-      shortcode: rows[0].ShortCode,
-      exitDate: rows[0].ExitDate,
-      items: Object.entries(itemCounts).map(([itemName, count]) => ({
-        itemName,
-        count
-      }))
-    };
+    const user = rows[0];
 
-    return NextResponse.json(studentInfo);
-
-  } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json(
-      { 
-        message: 'Database error',
-        error: {
-          code: error.code,
-          message: error.sqlMessage || error.message
-        }
+    const response = NextResponse.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        gate: user.gate,
       },
+    });
+
+    // Set cookies via NextResponse
+    response.cookies.set('userId', user.id.toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+
+    response.cookies.set('userGate', user.gate, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json(
+      { message: 'Login failed' },
       { status: 500 }
     );
   }

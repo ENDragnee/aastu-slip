@@ -1,5 +1,5 @@
 import React from 'react'
-import Login from '@/components/proctor-login'
+import Login from '@/components/login'
 
 const page = () => {
   return (

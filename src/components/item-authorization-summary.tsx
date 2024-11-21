@@ -23,7 +23,7 @@ export default function StudentItemManagement() {
 
     try {
       const response = await fetch(
-        `/api/gateway?shortcode=${searchShortcode}&studentId=${searchStudentId}`
+        `/api/gate?shortcode=${searchShortcode}&studentId=${searchStudentId}`
       );
 
       if (!response.ok) {
