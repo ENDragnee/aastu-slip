@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies
-RUN npm install --production
+# RUN npm install tailwindcss-animate class-variance-authority lucide-react
 
 # Copy the rest of the application code
 COPY . .
