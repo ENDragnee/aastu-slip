@@ -67,13 +67,13 @@ export default function ProctorsDashboard() {
       if (!response.ok) {
         throw new Error("Student not found");
       }
+  
       const data = await response.json();
-      const parsedItems = JSON.parse(data.Items);
       setSelectedStudent({
         id: data.StudentId,
         name: data.Name,
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
-        items: parsedItems[0],
+        items: data.Items, // Aggregated items
       });
     } catch (err) {
       setError(err.message);
@@ -82,7 +82,8 @@ export default function ProctorsDashboard() {
       setLoading(false);
     }
   };
-
+  
+  
   const handleAuthorize = async () => {
     try {
       const proctorId = 1;
@@ -162,21 +163,18 @@ export default function ProctorsDashboard() {
               <p className="mb-4">Requested Date: {selectedStudent.exitDate}</p>
               <h3 className="font-semibold mb-2">Items to Take Home:</h3>
               <ScrollArea className="h-[200px] rounded-md border p-4">
-                <ul className="space-y-2">
-                  {Object.entries(selectedStudent.items).map(
-                    ([itemName, quantity], index) => (
-                      <li
-                        key={index}
-                        className="flex justify-between items-center"
-                      >
-                        <span>{itemName}</span>
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-                          Quantity: {quantity}
-                        </span>
-                      </li>
-                    )
-                  )}
-                </ul>
+              <ul className="space-y-2">
+                {Object.entries(selectedStudent.items).map(([itemName, quantity], index) => (
+                  <li key={index} className="flex justify-between items-center">
+                    <span>{itemName}</span>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                      {quantity}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+
               </ScrollArea>
             </CardContent>
             <CardFooter className="flex justify-end">

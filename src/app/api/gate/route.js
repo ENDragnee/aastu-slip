@@ -44,9 +44,10 @@ export async function GET(request) {
     // Parse the JSON Items field
     const items = JSON.parse(rows[0].Items || '[]');
     
-    // Count items frequency
+    // Count items frequency based on test values
     const itemCounts = items.reduce((acc, item) => {
-      acc[item] = (acc[item] || 0) + 1;
+      const testValue = item.test;
+      acc[testValue] = (acc[testValue] || 0) + 1;
       return acc;
     }, {});
 
@@ -57,8 +58,8 @@ export async function GET(request) {
       shortcode: rows[0].ShortCode,
       exitDate: rows[0].ExitDate,
       items: Object.entries(itemCounts).map(([itemName, count]) => ({
-        itemName,
-        count
+        itemName: `Test ${itemName}`,
+        count: parseInt(count)
       }))
     };
 

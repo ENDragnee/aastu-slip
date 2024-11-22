@@ -5,23 +5,43 @@ import db from '@/lib/db';
 
 export async function GET(request) {
   const searchParams = new URL(request.url).searchParams;
-  const studentId = searchParams.get('studentId');
+  const studentId = searchParams.get("studentId");
 
   try {
     const [rows] = await db.execute(
-      'SELECT * FROM Requests WHERE StudentId = ?',
+      "SELECT StudentId, Name, DateOfRequest, Items FROM Requests WHERE StudentId = ?",
       [studentId]
     );
-    
+
     if (rows.length === 0) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    // Parse the original items array
+    const originalItems = JSON.parse(rows[0].Items);
+
+    // Aggregate the quantities for each unique key
+    const aggregatedItems = originalItems.reduce((acc, item) => {
+      Object.entries(item).forEach(([key, value]) => {
+        acc[key] = (acc[key] || 0) + value; // Add up quantities
+      });
+      return acc;
+    }, {});
+
+    const responseData = {
+      StudentId: rows[0].StudentId,
+      Name: rows[0].Name,
+      DateOfRequest: rows[0].DateOfRequest,
+      Items: aggregatedItems, // Aggregated items with quantities
+    };
+
+    return NextResponse.json(responseData);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
 
 export async function POST(request) {
   try {

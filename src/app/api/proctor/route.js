@@ -34,7 +34,7 @@ export async function POST(request) {
       maxAge: 60 * 60 * 24 // 24 hours
     });
 
-    response.cookies.set('userGate', 'proctor', {
+    response.cookies.set('userProc', 'proctor', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

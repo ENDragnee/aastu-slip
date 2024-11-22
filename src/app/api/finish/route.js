@@ -4,7 +4,7 @@ import db from '@/lib/db';
 
 export async function POST(request) {
   try {
-    const userToken = request.cookies.get('user_token');
+    const userToken = request.cookies.get('userGate');
     const exitedBy = userToken?.value || 'unknown';
 
     const { studentId } = await request.json();
