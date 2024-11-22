@@ -1,14 +1,24 @@
 // lib/db.js
 import mysql from 'mysql2/promise';
+import fs from 'fs';
+import path from 'path';
+
+const caCertPath = path.join(process.cwd(), '/src/lib', 'ca.pem');
+const caCert = fs.readFileSync(caCertPath);
 
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: "mysql-27f574f7-slip-3245.j.aivencloud.com",
+  user: "avnadmin",
+  port: "13415",
+  password: "AVNS_AGGNPH0eFXTMkokMR_f",
+  database: "defaultdb",
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  ssl: {
+    ca: caCert,
+    rejectUnauthorized: false
+  },
 });
 
 // Test the connection
