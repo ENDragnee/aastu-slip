@@ -45,15 +45,17 @@ export default function ProctorsDashboard() {
           'Content-Type': 'application/json',
         },
       })
-
+  
       if (!response.ok) {
         throw new Error('Logout failed')
       }
-
-      // Redirect to login page after successful logout
-      router.push('/login')
-      // Force a page refresh to clear any client-side state
-      router.refresh()
+  
+      // Clear any client-side state if needed
+      localStorage.clear() // If you're using localStorage
+      sessionStorage.clear() // If you're using sessionStorage
+  
+      // Redirect to login page
+      window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
     }
