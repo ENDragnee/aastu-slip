@@ -60,7 +60,7 @@ export default function GateLoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md p-6">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">Gate Login</CardTitle>
+          <CardTitle className="text-center text-2xl">User Login</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -80,7 +80,7 @@ export default function GateLoginPage() {
             </div>
             <div>
               <label htmlFor="gate" className="block text-sm font-medium text-gray-700 mb-1">
-                Gate
+                Username
               </label>
               <Input
                 type="text"

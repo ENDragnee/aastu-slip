@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X } from 'lucide-react'
+import { Search, X, LogOut } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+
 
 export default function StudentItemManagement() {
   const [searchShortcode, setSearchShortcode] = useState('')
@@ -11,6 +13,30 @@ export default function StudentItemManagement() {
   const [studentData, setStudentData] = useState(null)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+  
+      if (!response.ok) {
+        throw new Error('Logout failed')
+      }
+  
+      // Clear any client-side state if needed
+      localStorage.clear() // If you're using localStorage
+      sessionStorage.clear() // If you're using sessionStorage
+  
+      // Redirect to login page
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   const handleSearch = async () => {
     if (!searchShortcode && !searchStudentId) {
@@ -74,6 +100,16 @@ export default function StudentItemManagement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 font-sans flex flex-col items-center justify-center">
+      <header className="mb-8">
+        <div className="flex justify-between items-center">
+          <nav>
+            <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="w-5 h-5 mr-2" />
+              Logout
+            </Button>
+          </nav>
+        </div>
+      </header>
       <motion.h1 
         className="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 drop-shadow-lg"
         initial={{ opacity: 0, y: -20 }}
