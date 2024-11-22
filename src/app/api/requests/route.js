@@ -20,19 +20,25 @@ export async function GET(request) {
     // Parse the original items array
     const originalItems = JSON.parse(rows[0].Items);
 
-    // Aggregate the quantities for each unique key
-    const aggregatedItems = originalItems.reduce((acc, item) => {
-      Object.entries(item).forEach(([key, value]) => {
-        acc[key] = (acc[key] || 0) + value; // Add up quantities
-      });
+    // The items are already in the correct format, just aggregate quantities by name
+    const itemMap = originalItems.reduce((acc, item) => {
+      const currentQuantity = acc.get(item.name) || 0;
+      acc.set(item.name, currentQuantity + item.quantity);
       return acc;
-    }, {});
+    }, new Map());
 
+    // Convert to the desired format
+    const formattedItems = Array.from(itemMap).map(([name, quantity]) => ({
+      name,
+      quantity
+    }));
+
+    // Construct the final response
     const responseData = {
       StudentId: rows[0].StudentId,
       Name: rows[0].Name,
       DateOfRequest: rows[0].DateOfRequest,
-      Items: aggregatedItems, // Aggregated items with quantities
+      Items: formattedItems
     };
 
     return NextResponse.json(responseData);
@@ -40,8 +46,6 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
-
 
 export async function POST(request) {
   try {
@@ -81,46 +85,6 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Authorization error:', error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request) {
-  try {
-    // Parse the request body
-    const { studentId, name, dorm, block, items } = await request.json();
-
-    // Validate the incoming data
-    if (!studentId || !name || !dorm || !block || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid request data' },
-        { status: 400 }
-      );
-    }
-
-    // Convert items to JSON string for database storage
-    const itemsJson = JSON.stringify(items);
-
-    // Insert the request into the database
-    const [result] = await db.execute(
-      `
-      INSERT INTO Requests (StudentId, Name, Dorm, Block, Items)
-      VALUES (?, ?, ?, ?, ?)
-      `,
-      [studentId, name, dorm, block, itemsJson]
-    );
-
-    // Respond with success and the inserted request ID
-    return NextResponse.json({
-      success: true,
-      message: 'Request added successfully',
-      requestId: result.insertId,
-    });
-  } catch (error) {
-    console.error('Error adding request:', error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }

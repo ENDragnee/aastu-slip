@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ChevronDown, Minus, Plus, X } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { ChevronDown, Minus, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 const items = [
   "Clothing",
@@ -20,19 +20,31 @@ const items = [
   "Electronics",
   "Books",
   "Personal Care Items",
-]
+];
 
 export default function StudentItemManagement() {
-  const [selectedItems, setSelectedItems] = useState([])
-  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    studentId: "",
+    dorm: "",
+    block: "",
+  });
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [error, setError] = useState("");
 
   const addItem = (item) => {
-    setSelectedItems([...selectedItems, { name: item, quantity: 1 }])
-  }
+    if (selectedItems.some((selectedItem) => selectedItem.name === item)) {
+      setError("Item already added.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+    setSelectedItems([...selectedItems, { name: item, quantity: 1 }]);
+  };
 
   const removeItem = (index) => {
-    setSelectedItems(selectedItems.filter((_, i) => i !== index))
-  }
+    setSelectedItems(selectedItems.filter((_, i) => i !== index));
+  };
 
   const updateQuantity = (index, delta) => {
     setSelectedItems(
@@ -41,14 +53,58 @@ export default function StudentItemManagement() {
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
       )
-    )
-  }
+    );
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setShowConfirmation(true)
-    setTimeout(() => setShowConfirmation(false), 3000)
-  }
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.name ||
+      !formData.studentId ||
+      !formData.dorm ||
+      !formData.block ||
+      selectedItems.length === 0
+    ) {
+      setError("All fields and at least one item are required.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/studentReq", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...formData, items: selectedItems }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setShowConfirmation(true);
+        setTimeout(() => setShowConfirmation(false), 3000);
+        setFormData({
+          name: "",
+          studentId: "",
+          dorm: "",
+          block: "",
+        });
+        setSelectedItems([]);
+      } else {
+        setError(result.error || "Failed to submit request.");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      setError("An unexpected error occurred. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 p-6 ios-font">
@@ -58,36 +114,20 @@ export default function StudentItemManagement() {
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium text-gray-300">
-                Name
-              </Label>
-              <Input
-                id="name"
-                placeholder="Enter your name"
-                className="mt-1 bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400"
-              />
-            </div>
-            <div>
-              <Label htmlFor="studentId" className="text-sm font-medium text-gray-300">
-                Student ID
-              </Label>
-              <Input
-                id="studentId"
-                placeholder="Enter your student ID"
-                className="mt-1 bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400"
-              />
-            </div>
-            <div>
-              <Label htmlFor="exitDate" className="text-sm font-medium text-gray-300">
-                Exit Date
-              </Label>
-              <Input
-                id="exitDate"
-                type="date"
-                className="mt-1 bg-gray-800 border-gray-700 text-gray-100"
-              />
-            </div>
+            {["name", "studentId", "dorm", "block"].map((field) => (
+              <div key={field}>
+                <Label htmlFor={field} className="text-sm font-medium text-gray-300">
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                </Label>
+                <Input
+                  id={field}
+                  value={formData[field]}
+                  onChange={handleInputChange}
+                  placeholder={`Enter your ${field}`}
+                  className="mt-1 bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400"
+                />
+              </div>
+            ))}
           </div>
           <div className="space-y-4">
             <Label className="text-sm font-medium text-gray-300">Select Items</Label>
@@ -151,6 +191,9 @@ export default function StudentItemManagement() {
             Submit
           </Button>
         </form>
+        {error && (
+          <div className="text-red-500 text-center mt-4">{error}</div>
+        )}
         {showConfirmation && (
           <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg animate-fade-in-up">
             Items submitted successfully!
@@ -158,5 +201,5 @@ export default function StudentItemManagement() {
         )}
       </div>
     </div>
-  )
+  );
 }

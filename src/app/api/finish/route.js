@@ -35,13 +35,14 @@ export async function POST(request) {
 
       const items = itemsResult[0].Items;
 
-      // Update Exit table with Items and other fields
+      // Update Exit table with Items and other fields, including setting ShortCode to null
       const updateExitQuery = `
         UPDATE Exits 
         SET 
           ExitDate = NOW(),
           ExitedBy = ?,
-          Items = ?
+          Items = ?,
+          ShortCode = ''
         WHERE StudentId = ?
       `;
       await connection.execute(updateExitQuery, [exitedBy, items, studentId]);

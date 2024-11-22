@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import {
   Card,
   CardContent,
@@ -23,8 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, LogOut } from "lucide-react";
-import { useRouter } from 'next/navigation'
-
+import { useRouter } from "next/navigation";
 
 export default function ProctorsDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,32 +32,31 @@ export default function ProctorsDashboard() {
   const [error, setError] = useState(null);
   const [shortCode, setShortCode] = useState("");
   const [showShortCode, setShowShortCode] = useState(false);
-  const router = useRouter()
-
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/logout', {
-        method: 'POST',
+      const response = await fetch("/api/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      })
-  
+      });
+
       if (!response.ok) {
-        throw new Error('Logout failed')
+        throw new Error("Logout failed");
       }
-  
+
       // Clear any client-side state if needed
-      localStorage.clear() // If you're using localStorage
-      sessionStorage.clear() // If you're using sessionStorage
-  
+      localStorage.clear(); // If you're using localStorage
+      sessionStorage.clear(); // If you're using sessionStorage
+
       // Redirect to login page
-      window.location.href = '/login'
+      window.location.href = "/login";
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error("Logout error:", error);
     }
-  }
+  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -71,11 +68,13 @@ export default function ProctorsDashboard() {
       }
   
       const data = await response.json();
+  
+      // The items are already in the correct format, so we can use them directly
       setSelectedStudent({
         id: data.StudentId,
         name: data.Name,
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
-        items: data.Items, // Aggregated items
+        items: data.Items
       });
     } catch (err) {
       setError(err.message);
@@ -85,7 +84,7 @@ export default function ProctorsDashboard() {
     }
   };
   
-  
+
   const handleAuthorize = async () => {
     try {
       const proctorId = 1;
@@ -149,7 +148,9 @@ export default function ProctorsDashboard() {
                   className="pl-8"
                 />
               </div>
-              <Button type="submit">Search</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Searching..." : "Search"}
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -165,18 +166,16 @@ export default function ProctorsDashboard() {
               <p className="mb-4">Requested Date: {selectedStudent.exitDate}</p>
               <h3 className="font-semibold mb-2">Items to Take Home:</h3>
               <ScrollArea className="h-[200px] rounded-md border p-4">
-              <ul className="space-y-2">
-                {Object.entries(selectedStudent.items).map(([itemName, quantity], index) => (
-                  <li key={index} className="flex justify-between items-center">
-                    <span>{itemName}</span>
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-                      {quantity}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-
+                <ul className="space-y-2">
+                  {selectedStudent.items.map((item, index) => (
+                    <li key={index} className="flex justify-between items-center">
+                      <span>{item.name}</span>
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                        {item.quantity}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </ScrollArea>
             </CardContent>
             <CardFooter className="flex justify-end">
@@ -208,7 +207,6 @@ export default function ProctorsDashboard() {
             </CardFooter>
           </Card>
         )}
-
         {showShortCode && (
           <Dialog open={showShortCode} onOpenChange={setShowShortCode}>
             <DialogContent>

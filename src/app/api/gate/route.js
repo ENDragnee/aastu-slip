@@ -40,13 +40,14 @@ export async function GET(request) {
     // Parse the JSON Items field
     const items = JSON.parse(rows[0].Items || "[]");
 
-    // Aggregate item counts dynamically
-    const itemCounts = items.reduce((acc, item) => {
-      for (const [key, value] of Object.entries(item)) {
-        acc[key] = (acc[key] || 0) + value; // Sum the values of each key
+    // Aggregate quantities by item name
+    const itemMap = items.reduce((acc, item) => {
+      if (item.name && typeof item.quantity === 'number') {
+        const currentCount = acc.get(item.name) || 0;
+        acc.set(item.name, currentCount + item.quantity);
       }
       return acc;
-    }, {});
+    }, new Map());
 
     // Format the response
     const studentInfo = {
@@ -54,10 +55,10 @@ export async function GET(request) {
       studentId: rows[0].StudentId,
       shortcode: rows[0].ShortCode,
       DateOfRequest: rows[0].DateOfRequest,
-      items: Object.entries(itemCounts).map(([name, count]) => ({
+      items: Array.from(itemMap).map(([name, quantity]) => ({
         name,
-        count,
-      })),
+        count: quantity  // Using 'count' instead of 'quantity' to match the frontend
+      }))
     };
 
     return NextResponse.json(studentInfo);
