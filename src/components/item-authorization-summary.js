@@ -155,7 +155,7 @@ export default function StudentItemManagement() {
               <div className="space-y-4">
                 <p><strong className="text-blue-400">Name:</strong> {studentData.name}</p>
                 <p><strong className="text-blue-400">Student ID:</strong> {studentData.studentId}</p>
-                <p><strong className="text-blue-400">Exit Date:</strong> {new Date(studentData.exitDate).toLocaleDateString()}</p>
+                <p><strong className="text-blue-400">Request Date:</strong> {new Date(studentData.DateOfRequest).toLocaleDateString()}</p>
                 <h3 className="text-xl font-bold mt-6 mb-4 text-purple-400">Items:</h3>
                 <ul className="space-y-2">
                   {studentData.items.map((item, index) => (
@@ -166,7 +166,7 @@ export default function StudentItemManagement() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="bg-gray-700 rounded-lg p-3 flex justify-between items-center"
                     >
-                      <span>{item.itemName}</span>
+                      <span>{item.name}</span>
                       <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">{item.count}</span>
                     </motion.li>
                   ))}
