@@ -63,7 +63,7 @@ export default function StudentItemManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (
       !formData.name ||
       !formData.studentId ||
@@ -75,7 +75,7 @@ export default function StudentItemManagement() {
       setTimeout(() => setError(""), 3000);
       return;
     }
-
+  
     try {
       const response = await fetch("/api/studentReq", {
         method: "POST",
@@ -84,9 +84,9 @@ export default function StudentItemManagement() {
         },
         body: JSON.stringify({ ...formData, items: selectedItems }),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
         setShowConfirmation(true);
         setTimeout(() => setShowConfirmation(false), 3000);
@@ -97,6 +97,8 @@ export default function StudentItemManagement() {
           block: "",
         });
         setSelectedItems([]);
+      } else if (response.status === 409) {
+        setError(result.error); // Display duplicate entry error
       } else {
         setError(result.error || "Failed to submit request.");
       }
@@ -105,6 +107,7 @@ export default function StudentItemManagement() {
       setError("An unexpected error occurred. Please try again.");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 p-6 ios-font">

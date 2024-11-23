@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { saveAs } from "file-saver";
+
 import {
   Card,
   CardContent,
@@ -32,6 +34,7 @@ export default function ProctorsDashboard() {
   const [error, setError] = useState(null);
   const [shortCode, setShortCode] = useState("");
   const [showShortCode, setShowShortCode] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // New state
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -47,14 +50,26 @@ export default function ProctorsDashboard() {
         throw new Error("Logout failed");
       }
 
-      // Clear any client-side state if needed
-      localStorage.clear(); // If you're using localStorage
-      sessionStorage.clear(); // If you're using sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
 
-      // Redirect to login page
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const handleExportExits = async () => {
+    try {
+      const response = await fetch("/api/export-exit");
+      if (!response.ok) {
+        throw new Error("Failed to export Exits table");
+      }
+  
+      const blob = await response.blob();
+      saveAs(blob, "Exits.xlsx");
+    } catch (error) {
+      console.error("Export error:", error.message);
     }
   };
 
@@ -66,15 +81,14 @@ export default function ProctorsDashboard() {
       if (!response.ok) {
         throw new Error("Student not found");
       }
-  
+
       const data = await response.json();
-  
-      // The items are already in the correct format, so we can use them directly
+
       setSelectedStudent({
         id: data.StudentId,
         name: data.Name,
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
-        items: data.Items
+        items: data.Items,
       });
     } catch (err) {
       setError(err.message);
@@ -83,7 +97,6 @@ export default function ProctorsDashboard() {
       setLoading(false);
     }
   };
-  
 
   const handleAuthorize = async () => {
     try {
@@ -107,7 +120,9 @@ export default function ProctorsDashboard() {
       const data = await response.json();
       setIsAuthorized(true);
       setShortCode(data.shortCode);
-      setShowShortCode(true);
+
+      setShowConfirmModal(false); // Close the confirmation modal
+      setShowShortCode(true); // Show the short code modal
     } catch (err) {
       setError("Failed to authorize: " + err.message);
     }
@@ -129,6 +144,9 @@ export default function ProctorsDashboard() {
         </div>
       </header>
       <main>
+        <Button onClick={handleExportExits} className="bg-blue-500 hover:bg-blue-600 my-2">
+          Export Exits Table
+        </Button>
         <Card className="mb-8">
           <CardContent className="pt-6">
             <form
@@ -179,15 +197,14 @@ export default function ProctorsDashboard() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    className="bg-green-500 hover:bg-green-600"
-                    disabled={isAuthorized}
-                  >
-                    {isAuthorized ? "Authorized" : "Authorize"}
-                  </Button>
-                </DialogTrigger>
+              <Button
+                className="bg-green-500 hover:bg-green-600"
+                disabled={isAuthorized}
+                onClick={() => setShowConfirmModal(true)}
+              >
+                {isAuthorized ? "Authorized" : "Authorize"}
+              </Button>
+              <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Confirm Authorization</DialogTitle>
@@ -197,7 +214,7 @@ export default function ProctorsDashboard() {
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => {}}>
+                    <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
                       Cancel
                     </Button>
                     <Button onClick={handleAuthorize}>Confirm</Button>
