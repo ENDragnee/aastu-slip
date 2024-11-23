@@ -9,7 +9,7 @@ export async function GET(request) {
 
   try {
     const [rows] = await db.execute(
-      "SELECT StudentId, Name, DateOfRequest, Items FROM Requests WHERE StudentId = ?",
+      "SELECT StudentId, Name, DateOfRequest, Items, Status FROM Requests WHERE StudentId = ?",
       [studentId]
     );
 
@@ -38,7 +38,8 @@ export async function GET(request) {
       StudentId: rows[0].StudentId,
       Name: rows[0].Name,
       DateOfRequest: rows[0].DateOfRequest,
-      Items: formattedItems
+      Items: formattedItems,
+      Status: rows[0].Status
     };
 
     return NextResponse.json(responseData);
@@ -85,6 +86,12 @@ export async function POST(request) {
            ApprovalDate = ?
        WHERE StudentId = ?`,
       [proctorUsername, authorizedDate, studentId]
+    );
+    await db.execute(
+      `UPDATE Requests 
+       SET Status = 'Authorized'
+       WHERE StudentId = ? AND Status = 'Not-Authorized'`,
+      [studentId]
     );
 
     // Then, create a new exit record

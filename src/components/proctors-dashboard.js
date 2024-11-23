@@ -90,9 +90,8 @@ export default function ProctorsDashboard() {
     setLoading(true);
     setError(null);
     try {
-      // Format the student ID before searching
       const formattedSearchTerm = formatStudentId(searchTerm);
-      setSearchTerm(formattedSearchTerm); // Update the input field
+      setSearchTerm(formattedSearchTerm);
 
       const response = await fetch(`/api/requests?studentId=${formattedSearchTerm}`);
       if (!response.ok) {
@@ -106,7 +105,11 @@ export default function ProctorsDashboard() {
         name: data.Name,
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
         items: data.Items,
+        status: data.Status // Add this line
       });
+      
+      // Set isAuthorized based on the status
+      setIsAuthorized(data.Status === 'Authorized');
     } catch (err) {
       setError(err.message);
       setSelectedStudent(null);
@@ -143,8 +146,14 @@ export default function ProctorsDashboard() {
       setIsAuthorized(true);
       setShortCode(data.shortCode);
 
-      setShowConfirmModal(false); // Close the confirmation modal
-      setShowShortCode(true); // Show the short code modal
+      // Update the selected student's status
+      setSelectedStudent(prev => ({
+        ...prev,
+        status: 'Authorized'
+      }));
+
+      setShowConfirmModal(false);
+      setShowShortCode(true);
     } catch (err) {
       setError("Failed to authorize: " + err.message);
     }
@@ -197,11 +206,18 @@ export default function ProctorsDashboard() {
         {selectedStudent && (
           <Card>
             <CardHeader>
-              <CardTitle>{selectedStudent.name}</CardTitle>
-              <CardDescription>
-                Student ID: {selectedStudent.id}
-              </CardDescription>
-            </CardHeader>
+            <CardTitle>{selectedStudent.name}</CardTitle>
+            <CardDescription>
+              Student ID: {selectedStudent.id}
+              <div className={`mt-2 inline-block px-2 py-1 rounded-full text-sm ${
+                selectedStudent.status === 'Authorized' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                Status: {selectedStudent.status}
+              </div>
+            </CardDescription>
+          </CardHeader>
             <CardContent>
               <p className="mb-4">Requested Date: {selectedStudent.exitDate}</p>
               <h3 className="font-semibold mb-2">Items to Take Home:</h3>
@@ -220,7 +236,11 @@ export default function ProctorsDashboard() {
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button
-                className="bg-green-500 hover:bg-green-600"
+                className={`${
+                  isAuthorized 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
                 disabled={isAuthorized}
                 onClick={() => setShowConfirmModal(true)}
               >
