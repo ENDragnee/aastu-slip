@@ -50,14 +50,29 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const cookieStore = await cookies();
-    const proctorId = cookieStore.get('userId')?.value;
+    const proctorIdCookie = cookieStore.get('userId')?.value;
 
-    if (!proctorId) {
+    if (!proctorIdCookie) {
       return NextResponse.json(
         { message: 'Unauthorized' },
         { status: 401 }
       );
     }
+
+    // Fetch the username using proctorIdCookie
+    const [proctorRows] = await db.execute(
+      `SELECT username FROM Proctors WHERE ID = ?`,
+      [proctorIdCookie]
+    );
+
+    if (proctorRows.length === 0) {
+      return NextResponse.json(
+        { message: 'Proctor not found' },
+        { status: 404 }
+      );
+    }
+
+    const proctorUsername = proctorRows[0].username;
 
     const { studentId } = await request.json();
     const authorizedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -69,13 +84,13 @@ export async function POST(request) {
        SET ApprovedBy = ?, 
            ApprovalDate = ?
        WHERE StudentId = ?`,
-      [proctorId, authorizedDate, studentId]
+      [proctorUsername, authorizedDate, studentId]
     );
 
     // Then, create a new exit record
     await db.execute(
       'INSERT INTO Exits (StudentId, ShortCode, ApprovedBy) VALUES (?, ?, ?)',
-      [studentId, shortCode, proctorId]
+      [studentId, shortCode, proctorUsername]
     );
 
     return NextResponse.json({
@@ -91,3 +106,4 @@ export async function POST(request) {
     );
   }
 }
+
