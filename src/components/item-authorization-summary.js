@@ -14,6 +14,19 @@ export default function StudentItemManagement() {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  const formatStudentId = (studentId) => {
+    // Regular expressions for the valid formats
+    const etsPattern = /^ETS\d{4}\/\d{2}$/i;  // Case insensitive
+    const numberPattern = /^\d{4}\/\d{2}$/;
+    
+    if (etsPattern.test(studentId)) {
+      return studentId.toUpperCase(); // Normalize to uppercase
+    } else if (numberPattern.test(studentId)) {
+      return `ETS${studentId.toUpperCase()}`; // Add ETS prefix
+    }
+    return studentId; // Return original value if no pattern matches
+  };
+
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/logout', {
@@ -44,12 +57,16 @@ export default function StudentItemManagement() {
       return;
     }
 
+    // Format the student ID before searching
+    const formattedStudentId = formatStudentId(searchStudentId);
+    setSearchStudentId(formattedStudentId); // Update the input field
+
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await fetch(
-        `/api/gate?shortcode=${searchShortcode}&studentId=${searchStudentId}`
+        `/api/gate?shortcode=${searchShortcode}&studentId=${formattedStudentId}`
       );
 
       if (!response.ok) {
@@ -67,6 +84,12 @@ export default function StudentItemManagement() {
       setIsLoading(false);
     }
   }
+
+  // Handle student ID input change
+  const handleStudentIdChange = (e) => {
+    const value = e.target.value;
+    setSearchStudentId(value);
+  };
 
   const handleFinish = async () => {
     if (!studentData?.studentId) return;
@@ -141,7 +164,7 @@ export default function StudentItemManagement() {
             placeholder="Search Student ID"
             className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
             value={searchStudentId}
-            onChange={(e) => setSearchStudentId(e.target.value)}
+            onChange={handleStudentIdChange}
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
         </div>

@@ -33,6 +33,19 @@ export default function StudentItemManagement() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState("");
 
+  const validateStudentId = (studentId) => {
+    // Regular expressions for the valid formats
+    const etsPattern = /^ETS\d{4}\/\d{2}$/i;  // Case insensitive
+    const numberPattern = /^\d{4}\/\d{2}$/;
+    
+    if (etsPattern.test(studentId)) {
+      return studentId.toUpperCase(); // Normalize to uppercase
+    } else if (numberPattern.test(studentId)) {
+      return `ETS${studentId.toUpperCase()}`; // Add ETS prefix
+    }
+    return null; // Invalid format
+  };
+
   const addItem = (item) => {
     if (selectedItems.some((selectedItem) => selectedItem.name === item)) {
       setError("Item already added.");
@@ -75,6 +88,14 @@ export default function StudentItemManagement() {
       setTimeout(() => setError(""), 3000);
       return;
     }
+
+    // Validate student ID format
+    const validatedStudentId = validateStudentId(formData.studentId);
+    if (!validatedStudentId) {
+      setError("Invalid Student ID format. Valid formats are: ETSxxxx/xx, Etsxxxx/xx, or xxxx/xx");
+      setTimeout(() => setError(""), 5000);
+      return;
+    }
   
     try {
       const response = await fetch("/api/studentReq", {
@@ -82,7 +103,11 @@ export default function StudentItemManagement() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...formData, items: selectedItems }),
+        body: JSON.stringify({ 
+          ...formData, 
+          studentId: validatedStudentId, // Use the normalized student ID
+          items: selectedItems 
+        }),
       });
   
       const result = await response.json();
@@ -98,7 +123,7 @@ export default function StudentItemManagement() {
         });
         setSelectedItems([]);
       } else if (response.status === 409) {
-        setError(result.error); // Display duplicate entry error
+        setError(result.error);
       } else {
         setError(result.error || "Failed to submit request.");
       }

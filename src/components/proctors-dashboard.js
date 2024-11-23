@@ -37,6 +37,19 @@ export default function ProctorsDashboard() {
   const [showConfirmModal, setShowConfirmModal] = useState(false); // New state
   const router = useRouter();
 
+  const formatStudentId = (studentId) => {
+    // Regular expressions for the valid formats
+    const etsPattern = /^ETS\d{4}\/\d{2}$/i;  // Case insensitive
+    const numberPattern = /^\d{4}\/\d{2}$/;
+    
+    if (etsPattern.test(studentId)) {
+      return studentId.toUpperCase(); // Normalize to uppercase
+    } else if (numberPattern.test(studentId)) {
+      return `ETS${studentId.toUpperCase()}`; // Add ETS prefix
+    }
+    return studentId; // Return original value if no pattern matches
+  };
+
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/logout", {
@@ -77,7 +90,11 @@ export default function ProctorsDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/requests?studentId=${searchTerm}`);
+      // Format the student ID before searching
+      const formattedSearchTerm = formatStudentId(searchTerm);
+      setSearchTerm(formattedSearchTerm); // Update the input field
+
+      const response = await fetch(`/api/requests?studentId=${formattedSearchTerm}`);
       if (!response.ok) {
         throw new Error("Student not found");
       }
@@ -96,6 +113,11 @@ export default function ProctorsDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearchTermChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
   };
 
   const handleAuthorize = async () => {
@@ -162,7 +184,7 @@ export default function ProctorsDashboard() {
                   type="text"
                   placeholder="Search by Student Name or ID"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchTermChange}
                   className="pl-8"
                 />
               </div>
