@@ -35,7 +35,7 @@ export default function LoadingAnimation() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
-        Student Item Management
+        AASTU Check Out Portal
       </motion.h1>
       <motion.p
         className="mt-4 text-xl text-[#b8860b]"

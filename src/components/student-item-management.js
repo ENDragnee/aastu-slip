@@ -151,7 +151,7 @@ export default function StudentItemManagement() {
             --primary-blue: #003366;
             --primary-gold: #b8860b;
             --secondary-gray: #cccccc;
-            --background-white: #ffffff;
+            --background-white: #2A3F44;
           }
         `}</style>
         <header className="mb-8">
