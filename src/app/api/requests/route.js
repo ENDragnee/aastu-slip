@@ -12,6 +12,10 @@ export async function GET(request) {
       "SELECT StudentId, Name, DateOfRequest, Items, Status FROM Requests WHERE StudentId = ?",
       [studentId]
     );
+    const [shortCode] = await db.execute(
+      "Select ShortCode FROM Exits WHERE StudentId = ?",
+      [studentId]
+    );
 
     if (rows.length === 0) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
@@ -39,7 +43,8 @@ export async function GET(request) {
       Name: rows[0].Name,
       DateOfRequest: rows[0].DateOfRequest,
       Items: formattedItems,
-      Status: rows[0].Status
+      Status: rows[0].Status,
+      ShortCode: shortCode[0]?.ShortCode
     };
 
     return NextResponse.json(responseData);

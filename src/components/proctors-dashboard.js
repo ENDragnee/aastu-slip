@@ -107,7 +107,8 @@ export default function ProctorsDashboard() {
         name: data.Name,
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
         items: data.Items,
-        status: data.Status // Add this line
+        status: data.Status,
+        shortCode: data.ShortCode ?? ""
       });
       
       // Set isAuthorized based on the status
@@ -240,6 +241,7 @@ export default function ProctorsDashboard() {
                   Status: {selectedStudent.status}
                 </div>
               </CardDescription>
+                <CardTitle className="text-[#003366]">Short Code: {selectedStudent.shortCode}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-4 text-[#003366]">Requested Date: {selectedStudent.exitDate}</p>
