@@ -122,7 +122,7 @@ export default function StudentItemManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 text-[#003366] p-6 font-sans flex flex-col items-center justify-center">
+    <div style={{ minHeight: '60vh' }} className="min-h-screen bg-gradient-to-br from-white text-[#003366] font-sans flex flex-col items-center justify-center">
       <header className="mb-8">
         <div className="flex justify-between items-center">
           <nav>

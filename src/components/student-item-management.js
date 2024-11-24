@@ -21,8 +21,11 @@ const items = [
   "Books",
   "Personal Care Items",
 ];
+import LoadingAnimation from "@/components/loading"
+import { motion } from 'framer-motion'
 
 export default function StudentItemManagement() {
+  const [isLoading, setIsLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: "",
     studentId: "",
@@ -132,107 +135,115 @@ export default function StudentItemManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#003366] p-6 my-24">
-      <style jsx global>{`
-        :root {
-          --primary-blue: #003366;
-          --primary-gold: #b8860b;
-          --secondary-gray: #cccccc;
-          --background-white: #ffffff;
-        }
-      `}</style>
-      <div className="max-w-md mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-center text-[#b8860b]">
-          Student Item Management System
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            {["name", "studentId", "dorm", "block"].map((field) => (
-              <div key={field}>
-                <Label htmlFor={field} className="text-sm font-medium text-[#003366]">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </Label>
-                <Input
-                  id={field}
-                  value={formData[field]}
-                  onChange={handleInputChange}
-                  placeholder={`Enter your ${field}`}
-                  className="mt-1 bg-white border-[#cccccc] text-[#003366] placeholder-[#cccccc]"
-                />
-              </div>
-            ))}
-          </div>
-          <div className="space-y-4">
-            <Label className="text-sm font-medium text-[#003366]">Select Items</Label>
-            <Select onValueChange={addItem}>
-              <SelectTrigger className="w-full bg-white border-[#cccccc] text-[#003366]">
-                <SelectValue placeholder="Add an item" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-[#cccccc] text-[#003366]">
-                {items.map((item) => (
-                  <SelectItem key={item} value={item} className="focus:bg-[#cccccc]">
-                    {item}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-4">
-            {selectedItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-[#cccccc] p-3 rounded-lg shadow-md"
-              >
-                <span className="text-[#003366]">{item.name}</span>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 rounded-full text-[#003366]"
-                    onClick={() => updateQuantity(index, -1)}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="text-[#003366]">{item.quantity}</span>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 rounded-full text-[#003366]"
-                    onClick={() => updateQuantity(index, 1)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 rounded-full text-[#003366]"
-                    onClick={() => removeItem(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+    <>
+      <LoadingAnimation />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+      ></motion.div>
+      <div className="min-h-screen bg-white text-[#003366] p-6 my-14">
+        <style jsx global>{`
+          :root {
+            --primary-blue: #003366;
+            --primary-gold: #b8860b;
+            --secondary-gray: #cccccc;
+            --background-white: #ffffff;
+          }
+        `}</style>
+        <div className="max-w-md mx-auto space-y-8">
+          <h1 className="text-3xl font-bold text-center text-[#b8860b]">
+            Student Item Management System
+          </h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              {["name", "studentId", "dorm", "block"].map((field) => (
+                <div key={field}>
+                  <Label htmlFor={field} className="text-sm font-medium text-[#003366]">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </Label>
+                  <Input
+                    id={field}
+                    value={formData[field]}
+                    onChange={handleInputChange}
+                    placeholder={`Enter your ${field}`}
+                    className="mt-1 bg-white border-[#cccccc] text-[#003366] placeholder-[#cccccc]"
+                  />
                 </div>
-              </div>
-            ))}
-          </div>
-          <Button
-            type="submit"
-            className="w-full bg-[#b8860b] hover:bg-[#9a7209] text-white font-bold py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#b8860b] focus:ring-opacity-50"
-          >
-            Submit
-          </Button>
-        </form>
-        {error && (
-          <div className="text-red-500 text-center mt-4">{error}</div>
-        )}
-        {showConfirmation && (
-          <div className="fixed bottom-4 right-4 bg-[#b8860b] text-white p-4 rounded-lg shadow-lg animate-fade-in-up">
-            Items submitted successfully!
-          </div>
-        )}
+              ))}
+            </div>
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-[#003366]">Select Items</Label>
+              <Select onValueChange={addItem}>
+                <SelectTrigger className="w-full bg-white border-[#cccccc] text-[#003366]">
+                  <SelectValue placeholder="Add an item" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-[#cccccc] text-[#003366]">
+                  {items.map((item) => (
+                    <SelectItem key={item} value={item} className="focus:bg-[#cccccc]">
+                      {item}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-4">
+              {selectedItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-[#cccccc] p-3 rounded-lg shadow-md"
+                >
+                  <span className="text-[#003366]">{item.name}</span>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full text-[#003366]"
+                      onClick={() => updateQuantity(index, -1)}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-[#003366]">{item.quantity}</span>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full text-[#003366]"
+                      onClick={() => updateQuantity(index, 1)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full text-[#003366]"
+                      onClick={() => removeItem(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-[#b8860b] hover:bg-[#9a7209] text-white font-bold py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#b8860b] focus:ring-opacity-50"
+            >
+              Submit
+            </Button>
+          </form>
+          {error && (
+            <div className="text-red-500 text-center mt-4">{error}</div>
+          )}
+          {showConfirmation && (
+            <div className="fixed bottom-4 right-4 bg-[#b8860b] text-white p-4 rounded-lg shadow-lg animate-fade-in-up">
+              Items submitted successfully!
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
