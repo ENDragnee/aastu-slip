@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button";
+import Image from "next/image"; // Import the Image component
+import aastuImage from '../../public/AASTU.jpg'
 
 
 export default function StudentItemManagement() {
@@ -122,9 +124,9 @@ export default function StudentItemManagement() {
   }
 
   return (
-    <div style={{ minHeight: '60vh' }} className="min-h-screen bg-gradient-to-br from-white text-[#003366] font-sans flex flex-col items-center justify-center">
+    <div style={{ minHeight: '70vh' }} className="min-h-screen bg-gradient-to-br from-white text-[#003366] font-sans flex flex-col items-center justify-center">
       <header className="mb-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col justify-between items-center">
           <nav>
             <Button variant="ghost" className="text-[#003366] hover:text-[#b8860b]" onClick={handleLogout}>
               <LogOut className="w-5 h-5 mr-2" />
@@ -132,15 +134,26 @@ export default function StudentItemManagement() {
             </Button>
           </nav>
         </div>
+        <div className='flex'>
+        <div className="items-center">
+            <Image
+              src={aastuImage}
+              alt="AASTU Logo"
+              width={260} // Adjust the width
+              height={240} // Adjust the height
+              className="mb-6"
+            />
+          </div>
+          <motion.h1 
+            className="text-4xl font-bold mb-8 text-center text-[#003366] py-9"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Gateway Dashboard
+          </motion.h1>
+        </div>
       </header>
-      <motion.h1 
-        className="text-4xl font-bold mb-8 text-center text-[#b8860b]"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        Student Item Management System
-      </motion.h1>
 
       <motion.div 
         className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full max-w-2xl"

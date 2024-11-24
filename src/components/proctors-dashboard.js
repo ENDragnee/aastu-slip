@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveAs } from "file-saver";
+import Image from "next/image"; // Import the Image component
+import aastuImage from '../../public/AASTU.jpg'
 
 import {
   Card,
@@ -160,10 +162,19 @@ export default function ProctorsDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="min-h-screen bg-white p-10">
       <header className="mb-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#b8860b] text-center ">
+        <div className="items-center">
+            <Image
+              src={aastuImage}
+              alt="AASTU Logo"
+              width={200} // Adjust the width
+              height={160} // Adjust the height
+              className="mb-6"
+            />
+          </div>
+          <h1 className="text-4xl font-bold text-[#003366] text-center ">
             Proctor&apos;s Dashboard
           </h1>
           <nav>

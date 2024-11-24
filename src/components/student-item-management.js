@@ -12,6 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image"; // Import the Image component
+import aastuImage from '../../public/AASTU.jpg'
+
 
 const items = [
   "Clothing",
@@ -152,9 +155,20 @@ export default function StudentItemManagement() {
           }
         `}</style>
         <div className="max-w-md mx-auto space-y-8">
-          <h1 className="text-3xl font-bold text-center text-[#b8860b]">
-            Student Item Management System
-          </h1>
+          <div className="flex">
+            <div className="items-center">
+              <Image
+                src={aastuImage}
+                alt="AASTU Logo"
+                width={260} // Adjust the width
+                height={240} // Adjust the height
+                className="mb-6"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-center text-[#003366] py-9">
+              Check Out
+            </h1>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               {["name", "studentId", "dorm", "block"].map((field) => (

@@ -30,22 +30,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex flex-col text-center items-center justify-center">
-        <Image
-            src={aastuImage}
-            alt="AASTU Logo"
-            width={150} // Adjust the width
-            height={150} // Adjust the height
-            className="mb-6"
-          />
+        <div className="pb-16">
+          {children}
         </div>
-        {children}
       </body>
       <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#cccccc] text-center text-[#003366] shadow-lg">
-        <p className="text-sm">
-          Created and powered by AASTU SAAS Founders Club <span className="text-[#b8860b]">2024</span>
+        <p className="text-base font-medium">
+          &copy; AASTU SAAS Founders Club <span className="text-[#b8860b]">2024</span>
         </p>
       </footer>
+
     </html>
   );
 }
