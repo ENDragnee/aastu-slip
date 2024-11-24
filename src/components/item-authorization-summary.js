@@ -52,28 +52,28 @@ export default function StudentItemManagement() {
   }
 
   const handleSearch = async () => {
-    if (!searchShortcode && !searchStudentId) {
-      setError("Please enter either a shortcode or student ID");
+    if (!searchShortcode || !searchStudentId) {
+      setError("Both shortcode and student ID are required");
       return;
     }
-
+  
     // Format the student ID before searching
     const formattedStudentId = formatStudentId(searchStudentId);
     setSearchStudentId(formattedStudentId); // Update the input field
-
+  
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const response = await fetch(
-        `/api/gate?shortcode=${searchShortcode}&studentId=${formattedStudentId}`
+        `/api/gate?shortcode=${encodeURIComponent(searchShortcode)}&studentId=${encodeURIComponent(formattedStudentId)}`
       );
-
+  
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Failed to fetch student data');
       }
-
+  
       const data = await response.json();
       setStudentData(data);
       setShowSummary(true);

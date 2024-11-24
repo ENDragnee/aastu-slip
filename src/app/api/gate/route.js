@@ -4,8 +4,16 @@ import db from "@/lib/db";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const shortcode = searchParams.get("shortcode") || "";
-    const studentId = searchParams.get("studentId") || "";
+    const shortcode = searchParams.get("shortcode");
+    const studentId = searchParams.get("studentId");
+
+    // Check if both parameters are provided
+    if (!shortcode || !studentId) {
+      return NextResponse.json(
+        { message: "Both shortcode and student ID are required" },
+        { status: 400 }
+      );
+    }
 
     const query = `
       SELECT 
@@ -16,12 +24,12 @@ export async function GET(request) {
         r.Items
       FROM 
         Requests r
-      LEFT JOIN 
+      INNER JOIN 
         Exits e ON r.StudentId = e.StudentId
       WHERE 
-        (? = '' OR e.ShortCode = ?)
+        e.ShortCode = ?
         AND
-        (? = '' OR r.StudentId = ?)
+        r.StudentId = ?
       GROUP BY 
         r.StudentId,
         r.Name,
@@ -31,7 +39,7 @@ export async function GET(request) {
       LIMIT 1
     `;
 
-    const [rows] = await db.execute(query, [shortcode, shortcode, studentId, studentId]);
+    const [rows] = await db.execute(query, [shortcode, studentId]);
 
     if (!rows || rows.length === 0) {
       return NextResponse.json({ message: "No student found" }, { status: 404 });
@@ -57,7 +65,7 @@ export async function GET(request) {
       DateOfRequest: rows[0].DateOfRequest,
       items: Array.from(itemMap).map(([name, quantity]) => ({
         name,
-        count: quantity  // Using 'count' instead of 'quantity' to match the frontend
+        count: quantity
       }))
     };
 
