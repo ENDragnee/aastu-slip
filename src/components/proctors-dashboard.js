@@ -164,22 +164,22 @@ export default function ProctorsDashboard() {
   return (
     <div className="min-h-screen bg-white p-10">
       <header className="mb-8">
-        <div className="flex justify-between items-center">
-        <div className="items-center">
+        <div className="flex flex-col lg:flex-row justify-between items-center">
+          <div className="mb-6 lg:mb-0">
             <Image
               src={aastuImage}
               alt="AASTU Logo"
               width={200} // Adjust the width
               height={160} // Adjust the height
-              className="mb-6"
+              className="w-full lg:w-48 h-auto"
             />
           </div>
-          <h1 className="text-4xl font-bold text-[#003366] text-center ">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#003366] text-center lg:text-left">
             Proctor&apos;s Dashboard
           </h1>
-          <nav>
-            <Button 
-              variant="outline" 
+          <nav className="mt-4 lg:mt-0">
+            <Button
+              variant="outline"
               onClick={handleLogout}
               className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
             >
@@ -189,6 +189,7 @@ export default function ProctorsDashboard() {
           </nav>
         </div>
       </header>
+
       <main>
         <Button 
           onClick={handleExportExits} 

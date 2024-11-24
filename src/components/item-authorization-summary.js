@@ -134,18 +134,18 @@ export default function StudentItemManagement() {
             </Button>
           </nav>
         </div>
-        <div className='flex'>
-        <div className="items-center">
+        <div className='flex flex-col lg:flex-row items-center justify-center'>
+          <div className="mb-6 lg:mb-0">
             <Image
               src={aastuImage}
               alt="AASTU Logo"
               width={260} // Adjust the width
               height={240} // Adjust the height
-              className="mb-6"
+              className="w-full lg:w-64 h-auto" // Make the image responsive
             />
           </div>
-          <motion.h1 
-            className="text-4xl font-bold mb-8 text-center text-[#003366] py-9"
+          <motion.h1
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-[#003366] py-6 sm:py-9"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}

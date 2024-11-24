@@ -154,21 +154,24 @@ export default function StudentItemManagement() {
             --background-white: #ffffff;
           }
         `}</style>
-        <div className="max-w-md mx-auto space-y-8">
-          <div className="flex">
-            <div className="items-center">
+        <header className="mb-8">
+          <div className="flex flex-col lg:flex-row justify-center items-center">
+            <div className="mb-6 lg:mb-0">
               <Image
                 src={aastuImage}
                 alt="AASTU Logo"
                 width={260} // Adjust the width
                 height={240} // Adjust the height
-                className="mb-6"
+                className="w-full lg:w-64 h-auto" // Make the image responsive
               />
             </div>
-            <h1 className="text-4xl font-bold text-center text-[#003366] py-9">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-[#003366] py-6 sm:py-9">
               Check Out
             </h1>
           </div>
+        </header>
+
+        <div className="max-w-md mx-auto space-y-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               {["name", "studentId", "dorm", "block"].map((field) => (
