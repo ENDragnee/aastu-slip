@@ -34,16 +34,15 @@ export default function StudentItemManagement() {
   const [error, setError] = useState("");
 
   const validateStudentId = (studentId) => {
-    // Regular expressions for the valid formats
-    const etsPattern = /^ETS\d{4}\/\d{2}$/i;  // Case insensitive
+    const etsPattern = /^ETS\d{4}\/\d{2}$/i;
     const numberPattern = /^\d{4}\/\d{2}$/;
     
     if (etsPattern.test(studentId)) {
-      return studentId.toUpperCase(); // Normalize to uppercase
+      return studentId.toUpperCase();
     } else if (numberPattern.test(studentId)) {
-      return `ETS${studentId.toUpperCase()}`; // Add ETS prefix
+      return `ETS${studentId.toUpperCase()}`;
     }
-    return null; // Invalid format
+    return null;
   };
 
   const addItem = (item) => {
@@ -89,7 +88,6 @@ export default function StudentItemManagement() {
       return;
     }
 
-    // Validate student ID format
     const validatedStudentId = validateStudentId(formData.studentId);
     if (!validatedStudentId) {
       setError("Invalid Student ID format. Valid formats are: ETSxxxx/xx, Etsxxxx/xx, or xxxx/xx");
@@ -105,7 +103,7 @@ export default function StudentItemManagement() {
         },
         body: JSON.stringify({ 
           ...formData, 
-          studentId: validatedStudentId, // Use the normalized student ID
+          studentId: validatedStudentId,
           items: selectedItems 
         }),
       });
@@ -132,19 +130,26 @@ export default function StudentItemManagement() {
       setError("An unexpected error occurred. Please try again.");
     }
   };
-  
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 p-6 ios-font">
+    <div className="min-h-screen bg-white text-[#003366] p-6 my-24">
+      <style jsx global>{`
+        :root {
+          --primary-blue: #003366;
+          --primary-gold: #b8860b;
+          --secondary-gray: #cccccc;
+          --background-white: #ffffff;
+        }
+      `}</style>
       <div className="max-w-md mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 pb-2">
+        <h1 className="text-3xl font-bold text-center text-[#b8860b]">
           Student Item Management System
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             {["name", "studentId", "dorm", "block"].map((field) => (
               <div key={field}>
-                <Label htmlFor={field} className="text-sm font-medium text-gray-300">
+                <Label htmlFor={field} className="text-sm font-medium text-[#003366]">
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                 </Label>
                 <Input
@@ -152,20 +157,20 @@ export default function StudentItemManagement() {
                   value={formData[field]}
                   onChange={handleInputChange}
                   placeholder={`Enter your ${field}`}
-                  className="mt-1 bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400"
+                  className="mt-1 bg-white border-[#cccccc] text-[#003366] placeholder-[#cccccc]"
                 />
               </div>
             ))}
           </div>
           <div className="space-y-4">
-            <Label className="text-sm font-medium text-gray-300">Select Items</Label>
+            <Label className="text-sm font-medium text-[#003366]">Select Items</Label>
             <Select onValueChange={addItem}>
-              <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-100">
+              <SelectTrigger className="w-full bg-white border-[#cccccc] text-[#003366]">
                 <SelectValue placeholder="Add an item" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-gray-100">
+              <SelectContent className="bg-white border-[#cccccc] text-[#003366]">
                 {items.map((item) => (
-                  <SelectItem key={item} value={item} className="focus:bg-gray-700">
+                  <SelectItem key={item} value={item} className="focus:bg-[#cccccc]">
                     {item}
                   </SelectItem>
                 ))}
@@ -176,25 +181,25 @@ export default function StudentItemManagement() {
             {selectedItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-800 p-3 rounded-lg shadow-md"
+                className="flex items-center justify-between bg-[#cccccc] p-3 rounded-lg shadow-md"
               >
-                <span>{item.name}</span>
+                <span className="text-[#003366]">{item.name}</span>
                 <div className="flex items-center space-x-2">
                   <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full text-[#003366]"
                     onClick={() => updateQuantity(index, -1)}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span>{item.quantity}</span>
+                  <span className="text-[#003366]">{item.quantity}</span>
                   <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full text-[#003366]"
                     onClick={() => updateQuantity(index, 1)}
                   >
                     <Plus className="h-4 w-4" />
@@ -203,7 +208,7 @@ export default function StudentItemManagement() {
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 rounded-full text-red-400"
+                    className="h-8 w-8 rounded-full text-[#003366]"
                     onClick={() => removeItem(index)}
                   >
                     <X className="h-4 w-4" />
@@ -214,7 +219,7 @@ export default function StudentItemManagement() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="w-full bg-[#b8860b] hover:bg-[#9a7209] text-white font-bold py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#b8860b] focus:ring-opacity-50"
           >
             Submit
           </Button>
@@ -223,7 +228,7 @@ export default function StudentItemManagement() {
           <div className="text-red-500 text-center mt-4">{error}</div>
         )}
         {showConfirmation && (
-          <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg animate-fade-in-up">
+          <div className="fixed bottom-4 right-4 bg-[#b8860b] text-white p-4 rounded-lg shadow-lg animate-fade-in-up">
             Items submitted successfully!
           </div>
         )}

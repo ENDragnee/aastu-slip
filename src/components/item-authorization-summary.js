@@ -122,11 +122,11 @@ export default function StudentItemManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 font-sans flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 text-[#003366] p-6 font-sans flex flex-col items-center justify-center">
       <header className="mb-8">
         <div className="flex justify-between items-center">
           <nav>
-            <Button variant="ghost" onClick={handleLogout}>
+            <Button variant="ghost" className="text-[#003366] hover:text-[#b8860b]" onClick={handleLogout}>
               <LogOut className="w-5 h-5 mr-2" />
               Logout
             </Button>
@@ -134,7 +134,7 @@ export default function StudentItemManagement() {
         </div>
       </header>
       <motion.h1 
-        className="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 drop-shadow-lg"
+        className="text-4xl font-bold mb-8 text-center text-[#b8860b]"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -152,7 +152,7 @@ export default function StudentItemManagement() {
           <input
             type="text"
             placeholder="Search Shortcode"
-            className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+            className="w-full bg-white text-[#003366] placeholder-gray-400 border border-[#cccccc] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#003366] transition duration-300"
             value={searchShortcode}
             onChange={(e) => setSearchShortcode(e.target.value)}
           />
@@ -162,7 +162,7 @@ export default function StudentItemManagement() {
           <input
             type="text"
             placeholder="Search Student ID"
-            className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+            className="w-full bg-white text-[#003366] placeholder-gray-400 border border-[#cccccc] rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#003366] transition duration-300"
             value={searchStudentId}
             onChange={handleStudentIdChange}
           />
@@ -171,7 +171,7 @@ export default function StudentItemManagement() {
         <button
           onClick={handleSearch}
           disabled={isLoading}
-          className={`w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+          className={`w-full sm:w-auto bg-[#b8860b] hover:bg-[#8B6508] text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#b8860b] focus:ring-opacity-50 ${
             isLoading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
@@ -183,7 +183,7 @@ export default function StudentItemManagement() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 text-red-400 bg-red-900 bg-opacity-50 rounded-lg p-3"
+          className="mb-4 text-red-700 bg-red-100 rounded-lg p-3"
         >
           {error}
         </motion.div>
@@ -196,26 +196,26 @@ export default function StudentItemManagement() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4 z-50"
           >
             <motion.div
               initial={{ y: 50 }}
               animate={{ y: 0 }}
               exit={{ y: 50 }}
-              className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 shadow-2xl max-w-md w-full relative overflow-hidden"
+              className="bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full relative overflow-hidden"
             >
               <button
                 onClick={() => setShowSummary(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition duration-300"
+                className="absolute top-4 right-4 text-gray-400 hover:text-[#003366] transition duration-300"
               >
                 <X size={24} />
               </button>
-              <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Summary</h2>
+              <h2 className="text-3xl font-bold mb-6 text-center text-[#003366]">Summary</h2>
               <div className="space-y-4">
-                <p><strong className="text-blue-400">Name:</strong> {studentData.name}</p>
-                <p><strong className="text-blue-400">Student ID:</strong> {studentData.studentId}</p>
-                <p><strong className="text-blue-400">Request Date:</strong> {new Date(studentData.DateOfRequest).toLocaleDateString()}</p>
-                <h3 className="text-xl font-bold mt-6 mb-4 text-purple-400">Items:</h3>
+                <p><strong className="text-[#003366]">Name:</strong> {studentData.name}</p>
+                <p><strong className="text-[#003366]">Student ID:</strong> {studentData.studentId}</p>
+                <p><strong className="text-[#003366]">Request Date:</strong> {new Date(studentData.DateOfRequest).toLocaleDateString()}</p>
+                <h3 className="text-xl font-bold mt-6 mb-4 text-[#003366]">Items:</h3>
                 <ul className="space-y-2">
                   {studentData.items.map((item, index) => (
                     <motion.li
@@ -223,17 +223,17 @@ export default function StudentItemManagement() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-gray-700 rounded-lg p-3 flex justify-between items-center"
+                      className="bg-gray-50 border border-[#cccccc] rounded-lg p-3 flex justify-between items-center"
                     >
-                      <span>{item.name}</span>
-                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">{item.count}</span>
+                      <span className="text-[#003366]">{item.name}</span>
+                      <span className="bg-[#b8860b] text-white px-2 py-1 rounded-full text-sm">{item.count}</span>
                     </motion.li>
                   ))}
                 </ul>
               </div>
               <button
                 onClick={handleFinish}
-                className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                className="mt-6 w-full bg-[#b8860b] hover:bg-[#8B6508] text-white font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#b8860b] focus:ring-opacity-50"
               >
                 Finish
               </button>

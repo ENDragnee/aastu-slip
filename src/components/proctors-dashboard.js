@@ -160,14 +160,18 @@ export default function ProctorsDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-white p-8">
       <header className="mb-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-[#b8860b] text-center ">
             Proctor&apos;s Dashboard
           </h1>
           <nav>
-            <Button variant="ghost" onClick={handleLogout}>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
+            >
               <LogOut className="w-5 h-5 mr-2" />
               Logout
             </Button>
@@ -175,10 +179,13 @@ export default function ProctorsDashboard() {
         </div>
       </header>
       <main>
-        <Button onClick={handleExportExits} className="bg-blue-500 hover:bg-blue-600 my-2">
+        <Button 
+          onClick={handleExportExits} 
+          className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90 my-2"
+        >
           Export Exits Table
         </Button>
-        <Card className="mb-8">
+        <Card className="mb-8 border-[#cccccc]">
           <CardContent className="pt-6">
             <form
               onSubmit={(e) => {
@@ -188,45 +195,49 @@ export default function ProctorsDashboard() {
               className="flex items-center space-x-2"
             >
               <div className="relative flex-grow">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#003366]" />
                 <Input
                   type="text"
                   placeholder="Search by Student Name or ID"
                   value={searchTerm}
                   onChange={handleSearchTermChange}
-                  className="pl-8"
+                  className="pl-8 border-[#cccccc] text-[#003366] placeholder-[#003366]/50"
                 />
               </div>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
+              >
                 {loading ? "Searching..." : "Search"}
               </Button>
             </form>
           </CardContent>
         </Card>
         {selectedStudent && (
-          <Card>
+          <Card className="border-[#cccccc]">
             <CardHeader>
-            <CardTitle>{selectedStudent.name}</CardTitle>
-            <CardDescription>
-              Student ID: {selectedStudent.id}
-              <div className={`mt-2 inline-block px-2 py-1 rounded-full text-sm ${
-                selectedStudent.status === 'Authorized' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
-                Status: {selectedStudent.status}
-              </div>
-            </CardDescription>
-          </CardHeader>
+              <CardTitle className="text-[#003366]">{selectedStudent.name}</CardTitle>
+              <CardDescription className="text-[#003366]/70">
+                Student ID: {selectedStudent.id}
+                <div className={`mt-2 inline-block px-2 py-1 rounded-full text-sm ${
+                  selectedStudent.status === 'Authorized' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  Status: {selectedStudent.status}
+                </div>
+              </CardDescription>
+            </CardHeader>
             <CardContent>
-              <p className="mb-4">Requested Date: {selectedStudent.exitDate}</p>
-              <h3 className="font-semibold mb-2">Items to Take Home:</h3>
-              <ScrollArea className="h-[200px] rounded-md border p-4">
+              <p className="mb-4 text-[#003366]">Requested Date: {selectedStudent.exitDate}</p>
+              <h3 className="font-semibold mb-2 text-[#003366]">Items to Take Home:</h3>
+              <ScrollArea className="h-[200px] rounded-md border border-[#cccccc] p-4">
                 <ul className="space-y-2">
                   {selectedStudent.items.map((item, index) => (
                     <li key={index} className="flex justify-between items-center">
-                      <span>{item.name}</span>
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                      <span className="text-[#003366]">{item.name}</span>
+                      <span className="bg-[#cccccc] text-[#003366] px-2 py-1 rounded-full text-sm">
                         {item.quantity}
                       </span>
                     </li>
@@ -239,7 +250,7 @@ export default function ProctorsDashboard() {
                 className={`${
                   isAuthorized 
                     ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-green-500 hover:bg-green-600"
+                    : "bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                 }`}
                 disabled={isAuthorized}
                 onClick={() => setShowConfirmModal(true)}
@@ -247,19 +258,28 @@ export default function ProctorsDashboard() {
                 {isAuthorized ? "Authorized" : "Authorize"}
               </Button>
               <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-                <DialogContent>
+                <DialogContent className="bg-white border-[#cccccc]">
                   <DialogHeader>
-                    <DialogTitle>Confirm Authorization</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-[#003366]">Confirm Authorization</DialogTitle>
+                    <DialogDescription className="text-[#003366]/70">
                       Are you sure you want to authorize the items for{" "}
                       {selectedStudent.name}?
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowConfirmModal(false)}
+                      className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={handleAuthorize}>Confirm</Button>
+                    <Button 
+                      onClick={handleAuthorize}
+                      className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
+                    >
+                      Confirm
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -268,16 +288,21 @@ export default function ProctorsDashboard() {
         )}
         {showShortCode && (
           <Dialog open={showShortCode} onOpenChange={setShowShortCode}>
-            <DialogContent>
+            <DialogContent className="bg-white border-[#cccccc]">
               <DialogHeader>
-                <DialogTitle>Authorization Successful</DialogTitle>
-                <DialogDescription>Your short code is:</DialogDescription>
+                <DialogTitle className="text-[#003366]">Authorization Successful</DialogTitle>
+                <DialogDescription className="text-[#003366]/70">Your short code is:</DialogDescription>
                 <div className="mt-4 text-2xl font-bold text-center text-green-600">
                   {shortCode}
                 </div>
               </DialogHeader>
               <DialogFooter>
-                <Button onClick={() => setShowShortCode(false)}>Close</Button>
+                <Button 
+                  onClick={() => setShowShortCode(false)}
+                  className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
+                >
+                  Close
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
