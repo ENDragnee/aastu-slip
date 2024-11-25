@@ -82,7 +82,7 @@ export async function POST(request) {
 
     const { studentId } = await request.json();
     const authorizedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const shortCode = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const shortCode = Math.floor(Math.random() * 1000000).toString().padStart(4, '0');
 
     // First, update the request status
     await db.execute(
