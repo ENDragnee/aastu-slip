@@ -14,6 +14,14 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image"; // Import the Image component
 import aastuImage from '../../public/AASTU.jpg'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+
+} from "@/components/ui/dialog";
 
 
 const items = [
@@ -29,6 +37,10 @@ import { motion } from 'framer-motion'
 
 export default function StudentItemManagement() {
   const [isLoading, setIsLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(null); // To track update status
+  const [pendingSubmission, setPendingSubmission] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     studentId: "",
@@ -93,7 +105,7 @@ export default function StudentItemManagement() {
       setTimeout(() => setError(""), 3000);
       return;
     }
-
+  
     const validatedStudentId = validateStudentId(formData.studentId);
     if (!validatedStudentId) {
       setError("Invalid Student ID format. Valid formats are: ETSxxxx/xx, Etsxxxx/xx, or xxxx/xx");
@@ -102,39 +114,76 @@ export default function StudentItemManagement() {
     }
   
     try {
+      const submission = {
+        ...formData,
+        studentId: validatedStudentId,
+        items: selectedItems,
+        isUpdate: false,
+      };
+  
       const response = await fetch("/api/studentReq", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          ...formData, 
-          studentId: validatedStudentId,
-          items: selectedItems 
-        }),
+        body: JSON.stringify(submission),
       });
   
       const result = await response.json();
   
       if (response.ok) {
-        setShowConfirmation(true);
-        setTimeout(() => setShowConfirmation(false), 3000);
-        setFormData({
-          name: "",
-          studentId: "",
-          dorm: "",
-          block: "",
-        });
-        setSelectedItems([]);
-      } else if (response.status === 409) {
-        setError(result.error);
+        setShowModal(true);
+        resetForm();
+      } else if (
+        response.status === 409 &&
+        result.error?.includes(`A request with StudentId '${validatedStudentId}'`)
+      ) {
+        setPendingSubmission(submission);
+        setShowUpdateModal(true); // Show the update modal
       } else {
         setError(result.error || "Failed to submit request.");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
       console.error("Error submitting request:", error);
       setError("An unexpected error occurred. Please try again.");
     }
+  };
+  
+
+  const handleUpdate = async () => {
+    try {
+      const response = await fetch("/api/studentReq/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...pendingSubmission, isUpdate: true }),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setShowUpdateModal(false);
+        setUpdateSuccess(true); // Success modal
+      } else {
+        setUpdateSuccess(false); // Error modal
+        setError(result.error || "Update failed.");
+      }
+    } catch (err) {
+      setUpdateSuccess(false);
+      setError("An unexpected error occurred during the update.");
+    }
+  };
+  
+  
+  // Add this helper function to reset the form
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      studentId: "",
+      dorm: "",
+      block: "",
+    });
+    setSelectedItems([]);
+    setPendingSubmission(null);
   };
 
   return (
@@ -170,6 +219,64 @@ export default function StudentItemManagement() {
             </h1>
           </div>
         </header>
+
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-lg font-semibold text-[#003366]">
+                Success!
+              </DialogTitle>
+            </DialogHeader>
+            <div className="text-center py-4">
+              <p className="text-[#003366]">Your items have been submitted successfully.</p>
+              <Button
+                onClick={() => setShowModal(false)}
+                className="mt-4 bg-[#b8860b] hover:bg-[#9a7209] text-white"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Existing Request</DialogTitle>
+          </DialogHeader>
+          <p>
+            A request with this Student ID already exists. Would you like to
+            update it?
+          </p>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowUpdateModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate}>Update</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={updateSuccess !== null} onOpenChange={() => setUpdateSuccess(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {updateSuccess ? "Update Successful!" : "Error Updating Entry"}
+            </DialogTitle>
+          </DialogHeader>
+          <p>
+            {updateSuccess
+              ? "Your entry has been successfully updated."
+              : "There was an error updating your entry. Please try again."}
+          </p>
+          <DialogFooter>
+            <Button onClick={() => setUpdateSuccess(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
         <div className="max-w-md mx-auto space-y-8">
           <form onSubmit={handleSubmit} className="space-y-6">
