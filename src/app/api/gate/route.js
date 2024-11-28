@@ -17,25 +17,31 @@ export async function GET(request) {
 
     const query = `
       SELECT 
-        r.StudentId,
-        r.Name,
-        e.ShortCode,
-        r.DateOfRequest,
-        r.Items
+        StudentId,
+        Name,
+        Block,
+        Dorm,
+        ApprovedBy,
+        DateOfRequest,
+        Status,
+        ShortCode,
+        Items
       FROM 
-        Requests r
-      INNER JOIN 
-        Exits e ON r.StudentId = e.StudentId
+        Exits
       WHERE 
-        e.ShortCode = ?
+        ShortCode = ?
         AND
-        r.StudentId = ?
+        StudentId = ?
       GROUP BY 
-        r.StudentId,
-        r.Name,
-        e.ShortCode,
-        r.DateOfRequest,
-        r.Items
+        StudentId,
+        Name,
+        Block,
+        Dorm,
+        ApprovedBy,
+        DateOfRequest,
+        Status,
+        ShortCode,
+        Items
       LIMIT 1
     `;
 
@@ -59,10 +65,14 @@ export async function GET(request) {
 
     // Format the response
     const studentInfo = {
-      name: rows[0].Name,
       studentId: rows[0].StudentId,
-      shortcode: rows[0].ShortCode,
+      name: rows[0].Name,
+      block: rows[0].Block,
+      dorm: rows[0].Dorm,
+      approvedBy: rows[0].ApprovedBy,
       DateOfRequest: rows[0].DateOfRequest,
+      status: rows[0].Status,
+      shortcode: rows[0].ShortCode,
       items: Array.from(itemMap).map(([name, quantity]) => ({
         name,
         count: quantity

@@ -19,7 +19,7 @@ export async function POST(request) {
     // Insert the request into the database
     await db.execute(
       `
-      INSERT INTO Requests (StudentId, Name, Dorm, Block, Items)
+      INSERT INTO Exits (StudentId, Name, Dorm, Block, Items)
       VALUES (?, ?, ?, ?, ?)
       `,
       [studentId, name, dorm, block, itemsJson]

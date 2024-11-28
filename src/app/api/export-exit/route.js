@@ -14,28 +14,34 @@ export async function GET() {
     // Define column headers based on the table structure
     worksheet.columns = [
       { header: "ID", key: "ID", width: 10 },
+      { header: "Name", key: "Name", width: 10 },
       { header: "Student ID", key: "StudentId", width: 20 },
-      { header: "Exit Date", key: "ExitDate", width: 20 },
-      { header: "Approval Date", key: "ApprovalDate", width: 20 },
-      { header: "Short Code", key: "ShortCode", width: 20 },
-      { header: "Exited By", key: "ExitedBy", width: 20 },
+      { header: "Block", key: "Block", width: 10 },
+      { header: "Dorm", key: "Dorm", width: 10 },
       { header: "Approved By", key: "ApprovedBy", width: 20 },
+      { header: "Approval Date", key: "ApprovalDate", width: 20 },
       { header: "Items", key: "Items", width: 40 },
+      { header: "Exit Date", key: "ExitDate", width: 20 },
+      { header: "Exited By", key: "ExitedBy", width: 20 },
+      { header: "Status", key: "Status", width: 20 },
     ];
 
     // Add rows from the database to the worksheet
     rows.forEach((row) => {
       worksheet.addRow({
         ID: row.ID,
+        Name: row.Name,
         StudentId: row.StudentId,
-        ExitDate: row.ExitDate ? new Date(row.ExitDate).toLocaleString() : "",
+        Block: row.Block,
+        Dorm: row.Dorm,
+        ApprovedBy: row.ApprovedBy || "",
         ApprovalDate: row.ApprovalDate
           ? new Date(row.ApprovalDate).toLocaleString()
           : "",
-        ShortCode: row.ShortCode,
-        ExitedBy: row.ExitedBy || "",
-        ApprovedBy: row.ApprovedBy || "",
         Items: row.Items || "",
+        ExitDate: row.ExitDate ? new Date(row.ExitDate).toLocaleString() : "",
+        ExitedBy: row.ExitedBy || "",
+        Status: row.Status || "",
       });
     });
 

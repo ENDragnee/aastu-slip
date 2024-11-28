@@ -9,11 +9,7 @@ export async function GET(request) {
 
   try {
     const [rows] = await db.execute(
-      "SELECT StudentId, Name, DateOfRequest, Items, Status FROM Requests WHERE StudentId = ?",
-      [studentId]
-    );
-    const [shortCode] = await db.execute(
-      "Select ShortCode FROM Exits WHERE StudentId = ?",
+      "SELECT StudentId, Name, DateOfRequest, Items, Status, ShortCode FROM Exits WHERE StudentId = ?",
       [studentId]
     );
 
@@ -44,7 +40,7 @@ export async function GET(request) {
       DateOfRequest: rows[0].DateOfRequest,
       Items: formattedItems,
       Status: rows[0].Status,
-      ShortCode: shortCode[0]?.ShortCode
+      ShortCode: rows[0]?.ShortCode
     };
 
     return NextResponse.json(responseData);
@@ -93,16 +89,10 @@ export async function POST(request) {
       [proctorUsername, authorizedDate, studentId]
     );
     await db.execute(
-      `UPDATE Requests 
-       SET Status = 'Authorized'
+      `UPDATE Exits 
+       SET Status = 'Authorized', ShortCode = ?
        WHERE StudentId = ? AND Status = 'Not-Authorized'`,
-      [studentId]
-    );
-
-    // Then, create a new exit record
-    await db.execute(
-      'INSERT INTO Exits (StudentId, ShortCode, ApprovedBy) VALUES (?, ?, ?)',
-      [studentId, shortCode, proctorUsername]
+      [shortCode, studentId]
     );
 
     return NextResponse.json({

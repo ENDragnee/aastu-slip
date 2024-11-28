@@ -19,7 +19,7 @@ export async function POST(request) {
 
     // Check if the record exists
     const [existingRecords] = await connection.execute(
-      "SELECT COUNT(*) as count FROM Requests WHERE StudentId = ?",
+      "SELECT COUNT(*) as count FROM Exits WHERE StudentId = ?",
       [studentId]
     );
 
@@ -35,7 +35,7 @@ export async function POST(request) {
     // Perform the update
     await connection.execute(
       `
-      UPDATE Requests 
+      UPDATE Exits 
       SET Name = ?, Dorm = ?, Block = ?, Items = ?
       WHERE StudentId = ?
       `,
