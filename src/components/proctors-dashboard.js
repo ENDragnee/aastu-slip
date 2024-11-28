@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveAs } from "file-saver";
 import Image from "next/image"; // Import the Image component
-import aastuImage from '../../public/AASTU.jpg'
+import aastuImage from '/public/AASTU.jpg'
 
 import {
   Card,
@@ -36,7 +36,9 @@ export default function ProctorsDashboard() {
   const [error, setError] = useState(null);
   const [shortCode, setShortCode] = useState("");
   const [showShortCode, setShowShortCode] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // New state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [denyError, setDenyError] = useState(null);
+  const [showDenyModal, setShowDenyModal] = useState(null);
   const router = useRouter();
 
   const formatStudentId = (studentId) => {
@@ -161,6 +163,38 @@ export default function ProctorsDashboard() {
       setError("Failed to authorize: " + err.message);
     }
   };
+  
+  const handleDeny = async () => {
+    try {
+      setDenyError(null);
+      const response = await fetch(`/api/deny?studentId=${selectedStudent.id}`, {
+        method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // First check if the response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
+      }
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to deny request");
+      }
+  
+      // Clear the selected student and show success message
+      setSelectedStudent(null);
+      setSearchTerm("");
+      setShowDenyModal(false);
+    } catch (err) {
+      console.error("Deny request error:", err);
+      setDenyError(err.message || "An error occurred while denying the request");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white p-10">
@@ -259,14 +293,22 @@ export default function ProctorsDashboard() {
                 </ul>
               </ScrollArea>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-end space-x-2">
+              {selectedStudent.status !== 'Exited' && (
+              <Button
+                  className="bg-red-600 text-white hover:bg-red-700"
+                  onClick={() => setShowDenyModal(true)}
+                >
+                  Deny Request
+                </Button>
+              )}
               <Button
                 className={`${
                   isAuthorized 
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                 }`}
-                disabled={isAuthorized}
+                disabled={isAuthorized || "Exited"}
                 onClick={() => setShowConfirmModal(true)}
               >
                 {isAuthorized ? "Authorized" : "Authorize"}
@@ -293,6 +335,40 @@ export default function ProctorsDashboard() {
                       className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                     >
                       Confirm
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={showDenyModal} onOpenChange={setShowDenyModal}>
+                <DialogContent className="bg-white border-[#cccccc]">
+                  <DialogHeader>
+                    <DialogTitle className="text-[#003366]">Confirm Denial</DialogTitle>
+                    <DialogDescription className="text-[#003366]/70">
+                      Are you sure you want to deny the request for {selectedStudent?.name}? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {denyError && (
+                    <div className="text-red-600 text-sm mt-2">
+                      {denyError}
+                    </div>
+                  )}
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowDenyModal(false);
+                        setDenyError(null);
+                      }}
+                      className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleDeny}
+                      className="bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Deny
                     </Button>
                   </DialogFooter>
                 </DialogContent>
