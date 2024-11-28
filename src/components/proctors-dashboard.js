@@ -27,6 +27,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
+
 
 export default function ProctorsDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +42,8 @@ export default function ProctorsDashboard() {
   const [denyError, setDenyError] = useState(null);
   const [showDenyModal, setShowDenyModal] = useState(null);
   const router = useRouter();
+  const [exportOption, setExportOption] = useState("full"); // Default to "full"
+  const [dateRange, setDateRange] = useState({ start: "", end: "" }); // State for date range
 
   const formatStudentId = (studentId) => {
     // Regular expressions for the valid formats
@@ -78,11 +82,18 @@ export default function ProctorsDashboard() {
 
   const handleExportExits = async () => {
     try {
-      const response = await fetch("/api/export-exit");
+      let url = "/api/export-exit";
+      const { start, end } = dateRange;
+
+      if (exportOption === "dateRange" && start && end) {
+        url += `?start=${start}&end=${end}`;
+      }
+
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to export Exits table");
       }
-  
+
       const blob = await response.blob();
       saveAs(blob, "Exits.xlsx");
     } catch (error) {
@@ -226,12 +237,51 @@ export default function ProctorsDashboard() {
       </header>
 
       <main>
-        <Button 
-          onClick={handleExportExits} 
-          className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90 my-2"
-        >
-          Export Exits Table
-        </Button>
+      <div className="flex flex-col lg:flex-row items-center gap-4 mb-4">
+          <Select
+            onValueChange={(value) => setExportOption(value)}
+            value={exportOption}
+            className="w-64"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select export option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="full">Full Table</SelectItem>
+              <SelectItem value="dateRange">Date Range</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {exportOption === "dateRange" && (
+            <div className="flex gap-2">
+              <Input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) =>
+                  setDateRange((prev) => ({ ...prev, start: e.target.value }))
+                }
+                placeholder="Start Date"
+                className="border-[#cccccc] text-[#003366]"
+              />
+              <Input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) =>
+                  setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                }
+                placeholder="End Date"
+                className="border-[#cccccc] text-[#003366]"
+              />
+            </div>
+          )}
+
+          <Button
+            onClick={handleExportExits}
+            className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
+          >
+            Export Exits Table
+          </Button>
+        </div>
         <Card className="mb-8 border-[#cccccc]">
           <CardContent className="pt-6">
             <form

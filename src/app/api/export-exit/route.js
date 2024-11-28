@@ -1,11 +1,38 @@
 import db from "@/lib/db";
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(req) {
+  const cookieStore = cookies();
+  const proctorIdCookie = cookieStore.get("userId")?.value;
+  const [row] = await db.execute(
+    "SELECT username FROM Proctors WHERE id = ?",
+    [proctorIdCookie]
+  );
+
   try {
-    // Query the `Exits` table to get all records
-    const [rows] = await db.query("SELECT * FROM Exits");
+    if (!proctorIdCookie) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    // Parse query parameters
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get("start");
+    const endDate = searchParams.get("end");
+
+    // Base query and query parameters
+    let query = "SELECT * FROM Exits WHERE ApprovedBy = ?";
+    const queryParams = [row[0].username];
+
+    // Add date range filter if `start` and `end` are provided
+    if (startDate && endDate) {
+      query += " AND ExitDate BETWEEN ? AND ?";
+      queryParams.push(startDate, endDate);
+    }
+
+    // Query the database
+    const [rows] = await db.query(query, queryParams);
 
     // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
@@ -28,6 +55,18 @@ export async function GET() {
 
     // Add rows from the database to the worksheet
     rows.forEach((row) => {
+      // Format the `Items` column
+      const formattedItems = (() => {
+        try {
+          const itemsArray = JSON.parse(row.Items || "[]");
+          return itemsArray
+            .map((item) => `${item.name}:${item.quantity}`)
+            .join(", ");
+        } catch {
+          return row.Items || ""; // Return original value if parsing fails
+        }
+      })();
+
       worksheet.addRow({
         ID: row.ID,
         Name: row.Name,
@@ -38,7 +77,7 @@ export async function GET() {
         ApprovalDate: row.ApprovalDate
           ? new Date(row.ApprovalDate).toLocaleString()
           : "",
-        Items: row.Items || "",
+        Items: formattedItems,
         ExitDate: row.ExitDate ? new Date(row.ExitDate).toLocaleString() : "",
         ExitedBy: row.ExitedBy || "",
         Status: row.Status || "",
