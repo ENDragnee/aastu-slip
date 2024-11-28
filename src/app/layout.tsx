@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Head from "next/head"; // Import Head from next/head
+import SidebarWrapper from "@/components/sideBarWarp";
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,18 +31,19 @@ export default function RootLayout({
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className="pb-16">
-          {children}
-        </div>
-      </body>
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#cccccc] text-center text-[#003366] shadow-lg">
-        <p className="text-base font-medium">
-          &copy; AASTU SAAS Founders Club <span className="text-[#b8860b]">2024</span>
-        </p>
-      </footer>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <div className="pb-16">
+            {children}
+            <SidebarWrapper/>
+          </div>
+        </body>
+        <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#cccccc] text-center text-[#003366] shadow-lg">
+          <p className="text-base font-medium">
+            &copy; AASTU SAAS Founders Club <span className="text-[#b8860b]">2024</span>
+          </p>
+        </footer>
     </html>
   );
 }

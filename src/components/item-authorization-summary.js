@@ -128,10 +128,10 @@ export default function StudentItemManagement() {
       <header className="mb-8">
         <div className="flex flex-col justify-between items-center">
           <nav>
-            <Button variant="ghost" className="text-[#003366] hover:text-[#b8860b]" onClick={handleLogout}>
+            {/* <Button variant="ghost" className="text-[#003366] hover:text-[#b8860b]" onClick={handleLogout}>
               <LogOut className="w-5 h-5 mr-2" />
               Logout
-            </Button>
+            </Button> */}
           </nav>
         </div>
         <div className='flex flex-col lg:flex-row items-center justify-center'>

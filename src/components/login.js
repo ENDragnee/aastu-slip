@@ -74,7 +74,7 @@ export default function GateLoginPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="proctor">Proctor</SelectItem>
-                  <SelectItem value="gateway">Gateway</SelectItem>
+                  {/* <SelectItem value="gateway">Gateway</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>

@@ -28,5 +28,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/gateway/:path*', '/proctor/:path*'],
+  matcher: ['/proctor/:path*'],
 };

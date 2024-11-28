@@ -23,12 +23,10 @@ import {
 
 } from "@/components/ui/dialog";
 
-
 const items = [
   "Clothing",
   "Shoes",
   "Bed Sheets",
-  "Electronics",
   "Books",
   "Personal Care Items",
 ];
