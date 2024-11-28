@@ -74,7 +74,7 @@ export function Sidebar() {
           variants={sidebar}
           className={cn(
             'fixed inset-y-0 left-0 z-40 flex flex-col border-r bg-background/80 backdrop-blur-xl',
-            'dark:bg-background/80 dark:border-border/10 py-72 ',
+            'dark:bg-background/80 dark:border-border/10 py-72 max-h-full',
             isMobile && !isOpen && 'hidden'
           )}
         >
