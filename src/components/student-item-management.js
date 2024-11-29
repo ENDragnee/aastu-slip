@@ -133,8 +133,7 @@ export default function StudentItemManagement() {
         setShowModal(true);
         resetForm();
       } else if (
-        response.status === 409 &&
-        result.error?.includes(`A request with StudentId '${validatedStudentId}'`)
+        result.error?.includes(`The student with ID '${validatedStudentId}' has not exited.`)
       ) {
         setPendingSubmission(submission);
         setShowUpdateModal(true); // Show the update modal
