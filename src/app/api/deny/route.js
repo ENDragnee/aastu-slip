@@ -21,7 +21,7 @@ export async function DELETE(request) {
     try {
       // First check if the request exists and its status
       const [rows] = await connection.execute(
-        "SELECT Status FROM Exits WHERE StudentId = ?",
+        "SELECT Status FROM Exits WHERE StudentId = ? ORDER BY id DESC LIMIT 1",
         [studentId]
       );
 

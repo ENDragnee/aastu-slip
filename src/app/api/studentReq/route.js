@@ -4,6 +4,10 @@ import db from '@/lib/db';
 export async function POST(request) {
   try {
     const { studentId, name, dorm, block, items } = await request.json();
+    const [rows] = await db.execute(
+      "SELECT * FROM Exits WHERE StudentId = ?",
+      [studentId]
+    );
 
     // Validate the incoming data
     if (!studentId || !name || !dorm || !block || !Array.isArray(items) || items.length === 0) {
@@ -15,6 +19,13 @@ export async function POST(request) {
 
     // Convert items to JSON string for database storage
     const itemsJson = JSON.stringify(items);
+
+    if (rows.length > 0 && rows[0].Status !== 'Exited') {
+      return NextResponse.json(
+        { error: `The student with ID '${studentId}' has not exited.` },
+        { status: 409 }
+      );
+    }
 
     // Insert the request into the database
     await db.execute(
@@ -29,6 +40,7 @@ export async function POST(request) {
       success: true,
       message: 'Request added successfully',
     });
+    
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       // Handle duplicate entry error
