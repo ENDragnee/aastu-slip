@@ -5,7 +5,7 @@ export async function POST(request) {
   try {
     const { studentId, name, dorm, block, items } = await request.json();
     const [rows] = await db.execute(
-      "SELECT * FROM Exits WHERE StudentId = ?",
+      "SELECT * FROM Exits WHERE StudentId = ? ORDER BY id DESC LIMIT 1",
       [studentId]
     );
 

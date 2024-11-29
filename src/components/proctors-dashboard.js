@@ -358,7 +358,7 @@ export default function ProctorsDashboard() {
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                 }`}
-                disabled={isAuthorized && "Exited"}
+                disabled={isAuthorized || selectedStudent.status == "Exited"}
                 onClick={() => setShowConfirmModal(true)}
               >
                 {isAuthorized ? "Authorized" : "Authorize"}

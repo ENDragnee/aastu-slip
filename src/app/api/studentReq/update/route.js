@@ -36,8 +36,8 @@ export async function POST(request) {
     await connection.execute(
       `
       UPDATE Exits 
-      SET Name = ?, Dorm = ?, Block = ?, Items = ?
-      WHERE StudentId = ?
+      SET Name = ?, Dorm = ?, Block = ?, Items = ?, Status = 'Not-Authorized', ShortCode = null, ApprovedBy = null, ApprovalDate = null
+      WHERE StudentId = ? AND Status != 'Exited'
       `,
       [name, dorm, block, itemsJson, studentId]
     );

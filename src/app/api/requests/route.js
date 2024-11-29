@@ -9,7 +9,7 @@ export async function GET(request) {
 
   try {
     const [rows] = await db.execute(
-      "SELECT StudentId, Name, DateOfRequest, Items, Status, ShortCode FROM Exits WHERE StudentId = ?",
+      "SELECT StudentId, Name, DateOfRequest, Items, Status, ShortCode FROM Exits WHERE StudentId = ? AND Status != 'Exited' ORDER BY id DESC LIMIT 1",
       [studentId]
     );
 
