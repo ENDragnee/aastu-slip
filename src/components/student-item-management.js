@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/dialog";
 
 const items = [
-  "Clothing",
-  "Shoes",
-  "Bed Sheets",
-  "Books",
-  "Personal Care Items",
+  "ልብስ",
+  "ጫማ",
+  "የአልጋ ልብስ",
+  "መፀሀፍ",
+  "የግል ንፅህና መጠበቂያ",
 ];
 import LoadingAnimation from "@/components/loading"
 import { motion } from 'framer-motion'
