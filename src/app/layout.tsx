@@ -19,6 +19,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "AASTU Slip System",
   description: "A digital system for AASTU students to use as a slip",
+  icons: "/favicon.ico"
 };
 
 export default function RootLayout({
@@ -28,9 +29,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
@@ -39,11 +37,6 @@ export default function RootLayout({
             <SidebarWrapper/>
           </div>
         </body>
-        <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#cccccc] text-center text-[#003366] shadow-lg">
-          <p className="text-base font-medium">
-            &copy; AASTU SAAS Founders Club <span className="text-[#b8860b]">2024</span>
-          </p>
-        </footer>
     </html>
   );
 }

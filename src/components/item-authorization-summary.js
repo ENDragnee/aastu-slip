@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import Footer  from "@/components/footer"
+
 
 export default function StudentItemManagement() {
   const [searchShortcode, setSearchShortcode] = useState('')
@@ -267,6 +269,7 @@ export default function StudentItemManagement() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Footer/>
     </div>
   )
 }

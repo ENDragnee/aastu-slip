@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { saveAs } from "file-saver";
 import Image from "next/image"; // Import the Image component
 import aastuImage from '/public/AASTU.jpg'
+import Footer  from "@/components/footer"
+
 
 import {
   Card,
@@ -448,6 +450,7 @@ export default function ProctorsDashboard() {
           </Dialog>
         )}
       </main>
+      <Footer/>
     </div>
   );
 }
