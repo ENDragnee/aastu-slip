@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,4 +5,187 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id           String  @id @default(cuid())
+  name         String
+  universityId String  @unique
+  email        String? @unique
+  phoneNumber  String?
+  role         Role
+
+  blockId String?
+  block   Block?  @relation(fields: [blockId], references: [id], onDelete: SetNull)
+
+  profile Media?
+
+  accounts Account[]
+  sessions Session[]
+
+  exitsAsStudent  Exit[] @relation("Student")
+  exitApprovedBy  Exit[] @relation("ApprovedBy")
+  exitValidatedBy Exit[] @relation("ValidatedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, name, role])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id       String @id @default(cuid())
+  password String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken  String?
+  refreshToken String?
+
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, userId])
+  @@map("account")
+}
+
+model Media {
+  id        String    @id @default(cuid())
+  mimeType  String
+  size      Int
+  mediaType MediaType
+  url       String
+  key       String
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([id, mediaType])
+  @@map("media")
+}
+
+model Block {
+  id   String @id @default(cuid())
+  name String @unique
+
+  locationId String?   @unique
+  location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, name])
+  @@map("block")
+}
+
+model Gate {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  status     GateStatus @default(ONLINE)
+  locationId String?    @unique
+  location   Location?  @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@map("gate")
+}
+
+model Location {
+  id          String  @id @default(cuid())
+  coordinates String?
+  description String?
+
+  gate  Gate?
+  block Block?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("location")
+}
+
+model Exit {
+  id            String     @id @default(cuid())
+  currentStatus ExitStatus @default(REQUESTED)
+
+  studentId  String
+  proctorId  String?
+  gateUserId String?
+
+  student  User  @relation("Student", fields: [studentId], references: [id])
+  proctor  User? @relation("ApprovedBy", fields: [proctorId], references: [id])
+  gateUser User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
+
+  exitEvents ExitEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, studentId, proctorId, gateUserId])
+  @@map("exit")
+}
+
+model ExitEvent {
+  id     String     @id @default(cuid())
+  status ExitStatus
+  note   String?
+  at     DateTime   @default(now())
+
+  exitId String
+  exit   Exit   @relation(fields: [exitId], references: [id], onDelete: Cascade)
+
+  @@index([status, at, exitId])
+  @@map("exit_event")
+}
+
+enum Role {
+  STUDENT
+  PROCTOR
+  ADMIN
+  GATE
+}
+
+enum MediaType {
+  PROFILE
+  IMAGE
+  VIDEO
+}
+
+enum ExitStatus {
+  REQUESTED
+  APPROVED
+  DENIED
+  EXITED
+}
+
+enum GateStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+  MAINTENANCE
 }
