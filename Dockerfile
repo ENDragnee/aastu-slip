@@ -1,26 +1,66 @@
-# Use the Node.js 19 image
-FROM node:19-alpine
+FROM node:22-alpine AS base
 
-# Set environment variables for production mode
-ENV NODE_ENV=production
-
-# Set the working directory in the container
+# 1. Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Install pnpm
+RUN npm install -g pnpm
 
-# Install production dependencies
-# RUN npm install tailwindcss-animate class-variance-authority lucide-react
+COPY package.json pnpm-lock.yaml ./
 
-# Copy the rest of the application code
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# 2. Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+RUN npm install -g pnpm
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the Next.js app with the App Router and `src` folder structure
-RUN npm run build
+# ✅ Generate Prisma Client
+# We need the engine here for the build process
+RUN pnpm prisma generate
 
-# Expose the port Next.js will run on
+# Build the project
+RUN pnpm build
+
+# 3. Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# ✅ Install OpenSSL (Required for Prisma on Alpine)
+RUN apk add --no-cache openssl
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy public folder
+COPY --from=builder /app/public ./public
+
+# Copy Prisma schema for migrations
+COPY --from=builder /app/prisma ./prisma
+
+# ✅ Copy the standalone build
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# ✅ Copy generated client (since you use a custom output path)
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+
+USER nextjs
+
 EXPOSE 3000
 
-# Command to run the app
-CMD ["npm", "run", "start"]
+# ✅ FIX: 
+# 1. Use 'npx -y' because 'pnpm' is not installed in this stage.
+# 2. Use 'node server.js' because this is a standalone build.
+CMD ["sh", "-c", "npx -y prisma migrate deploy && node server.js"]
