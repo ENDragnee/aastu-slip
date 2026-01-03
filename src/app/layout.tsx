@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Head from "next/head"; // Import Head from next/head
 import SidebarWrapper from "@/components/sideBarWarp";
+import Providers from "@/components/providers";
 
 
 const geistSans = localFont({
@@ -28,15 +28,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <div className="pb-16">
-            {children}
-            <SidebarWrapper/>
-          </div>
-        </body>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>
+          {children}
+        </Providers>
+        <SidebarWrapper />
+      </body>
     </html>
   );
 }
