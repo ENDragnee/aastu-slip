@@ -23,6 +23,7 @@ model User {
   accounts Account[]
   sessions Session[]
 
+  exitedStudent   Exit[] @relation("StudentId")
   exitsAsStudent  Exit[] @relation("Student")
   exitApprovedBy  Exit[] @relation("ApprovedBy")
   exitValidatedBy Exit[] @relation("ValidatedBy")
@@ -30,7 +31,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id, name, role])
+  @@index([id, name, role, universityId])
   @@map("user")
 }
 
@@ -132,21 +133,24 @@ model Location {
 model Exit {
   id            String     @id @default(cuid())
   currentStatus ExitStatus @default(REQUESTED)
+  exitCode      String     @unique
 
-  studentId  String
-  proctorId  String?
-  gateUserId String?
+  studentId           String
+  studentUniversityId String
+  proctorId           String?
+  gateUserId          String?
 
-  student  User  @relation("Student", fields: [studentId], references: [id])
-  proctor  User? @relation("ApprovedBy", fields: [proctorId], references: [id])
-  gateUser User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
+  student      User  @relation("Student", fields: [studentId], references: [id])
+  studentUniId User  @relation("StudentId", fields: [studentUniversityId], references: [universityId])
+  proctor      User? @relation("ApprovedBy", fields: [proctorId], references: [id])
+  gateUser     User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
 
   exitEvents ExitEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id, studentId, proctorId, gateUserId])
+  @@index([id, studentId, proctorId, gateUserId, studentUniversityId])
   @@map("exit")
 }
 
