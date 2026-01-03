@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import SidebarWrapper from "@/components/sideBarWarp";
 import Providers from "@/components/providers";
+import Footer from "@/components/footer";
 
 
 const geistSans = localFont({
@@ -34,6 +35,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <Footer />
         </Providers>
         <SidebarWrapper />
       </body>
