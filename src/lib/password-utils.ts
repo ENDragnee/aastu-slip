@@ -13,7 +13,7 @@ export async function hash_password(password: string): Promise<string> {
   return await hash(password, salt);
 }
 
-export async function vaildate_password(
+export async function validate_password(
   password: string,
   hashed_password: string,
 ): Promise<boolean> {
