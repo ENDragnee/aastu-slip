@@ -1,19 +1,38 @@
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const userId = request.cookies.get("userId");
-  const userGate = request.cookies.get("userGate"); // Retrieve userGate from cookies
-  const url = request.nextUrl.clone();
+const publicUrls = [
+  "/",
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/landing",
+  "/about-us",
+];
 
-  if (!userId) {
-    // Redirect to login page if not logged in
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request });
+  const { pathname } = request.nextUrl;
+
+  const isPublicUrl = publicUrls.includes(pathname);
+
+  if (isPublicUrl) {
+    return NextResponse.next();
+  }
+
+  if (!token && !isPublicUrl) {
+    const signInUrl = new URL("/auth/sign-in", request.url);
+    signInUrl.searchParams.set(
+      "callbackUrl",
+      pathname + request.nextUrl.search,
+    );
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/proctor/:path*"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|webmanifest|xml|txt)$).*)",
+  ],
 };
