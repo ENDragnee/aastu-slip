@@ -22,6 +22,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  laptops  Laptop[]
 
   exitedStudent   Exit[] @relation("StudentId")
   exitsAsStudent  Exit[] @relation("Student")
@@ -130,10 +131,47 @@ model Location {
   @@map("location")
 }
 
+model Laptop {
+  id           String @id @default(cuid())
+  serialNumber String
+  model        String
+  manufacturer String
+
+  studentUniversityId String?
+  student             User?   @relation(fields: [studentUniversityId], references: [universityId], onDelete: SetNull)
+
+  exitId String?
+  exit   Exit?   @relation(fields: [exitId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentUniversityId, serialNumber, exitId])
+  @@map("laptop")
+}
+
+model Property {
+  id          String @id @default(cuid())
+  name        String
+  description String
+
+  exits ExitProperty[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("property")
+}
+
 model Exit {
   id            String     @id @default(cuid())
   currentStatus ExitStatus @default(REQUESTED)
   exitCode      String     @unique
+
+  properties ExitProperty[]
+
+  laptops Laptop[]
 
   studentId           String
   studentUniversityId String
@@ -152,6 +190,17 @@ model Exit {
 
   @@index([id, studentId, proctorId, gateUserId, studentUniversityId])
   @@map("exit")
+}
+
+model ExitProperty {
+  exitId     String
+  propertyId String
+
+  exit     Exit     @relation(fields: [exitId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@id([exitId, propertyId])
+  @@map("exit_propery")
 }
 
 model ExitEvent {
