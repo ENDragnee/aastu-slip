@@ -4,15 +4,101 @@ import type React from "react"
 
 import Link from "next/link"
 import { SignUpForm } from "@/components/auth/sign-up-form"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { z } from 'zod'
+import { useQueryClient, useMutation } from "@tanstack/react-query"
 
-interface SignUpViewProps {
-  onSubmit: (e: React.FormEvent) => Promise<void>
-  isLoading: boolean
-  handleSocial: (provider: "google" | "apple") => Promise<void>
-  error?: string
+interface INewUser {
+  firstName: string;
+  lastName: string;
+  password: string;
+  block: string;
+  email: string;
+  phoneNumber: string;
+  universityId: string;
+
 }
 
-export function SignUpView({ onSubmit, isLoading, handleSocial, error = "" }: SignUpViewProps) {
+const universityBlocks = [
+  {
+    name: "Block1"
+  },
+
+  {
+    name: "Block2"
+  }
+]
+
+const createUser = async (newUser: INewUser) => {
+  const response = await fetch('/api/auth/sign-up', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newUser),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to create post');
+  }
+
+  return response.json();
+}
+
+export function SignUpView() {
+
+  const [error, setError] = useState("")
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const signUpSchema = z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string().email(),
+    phoneNumber: z.string(),
+    universityId: z.string().min(4).regex(/^ets\d{4}\/\d+$/i,
+      "Invalid format. Expected ETS0000/00"),
+    block: z.string(),
+    password: z.string().min(8)
+  })
+
+  const mutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      router.push("/dashboard")
+      console.log('User created successfully!');
+    },
+    onError: (error: any) => {
+      console.error('An error occurred:', error.message);
+    }
+  });
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement)
+
+    const validatedFields = signUpSchema.safeParse({
+      firstName: formData.get("firstName")?.toString().toLowerCase,
+      lastName: formData.get("lastName")?.toString().toLowerCase,
+      email: formData.get("email"),
+      phoneNumber: formData.get("phoneNumber"),
+      universityId: formData.get("universityId"),
+      block: formData.get("block"),
+      password: formData.get("password"),
+    })
+
+    if (!validatedFields.success) {
+      setError("Please enter a proper value")
+      return
+    }
+
+    mutation.mutate(validatedFields.data)
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Form */}
@@ -41,7 +127,7 @@ export function SignUpView({ onSubmit, isLoading, handleSocial, error = "" }: Si
             <p className="text-muted-foreground">Join to order</p>
           </div>
 
-          <SignUpForm onSubmit={onSubmit} isLoading={isLoading} handleSocial={handleSocial} error={error} />
+          <SignUpForm onSubmit={onSubmit} isLoading={mutation.isPending} error={error} universityBlocks={universityBlocks} />
 
           <div className="mt-8 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>

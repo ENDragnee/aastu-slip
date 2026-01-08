@@ -7,12 +7,14 @@ const publicUrls = [
   "/auth/sign-up",
   "/landing",
   "/about-us",
-  "/dashboard",
 ];
+
+const authRoutes = ["/auth/sign-in", "/auth/sign-up"];
 
 export async function proxy(request: NextRequest) {
   const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+  const isAuthRoute = authRoutes.includes(pathname);
 
   const isPublicUrl = publicUrls.includes(pathname);
 
@@ -20,12 +22,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (token && isAuthRoute) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   if (!token && !isPublicUrl) {
     const signInUrl = new URL("/auth/sign-in", request.url);
-    signInUrl.searchParams.set(
-      "callbackUrl",
-      pathname + request.nextUrl.search,
-    );
+    signInUrl.searchParams.set("callbackUrl", pathname + search);
     return NextResponse.redirect(signInUrl);
   }
 

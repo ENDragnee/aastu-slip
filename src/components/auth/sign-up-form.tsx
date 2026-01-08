@@ -1,26 +1,32 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { AuthErrorDisplay } from "@/components/auth/auth-error"
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "../ui/select"
+import { House } from "lucide-react"
+
+interface IUniversityBlock {
+  name: string
+}
 
 export function SignUpForm({
   onSubmit,
   isLoading = false,
-  handleSocial,
+  universityBlocks,
   error = "",
 }: {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
   isLoading?: boolean
-  handleSocial: (provider: "google" | "apple") => Promise<void>
+  universityBlocks: IUniversityBlock[]
   error?: string
 }) {
   const [formData, setFormData] = useState({
+    universityId: "",
+    phoneNumber: "",
+    block: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -137,6 +143,58 @@ export function SignUpForm({
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="universityId" className="uppercase text-xs tracking-wider font-medium">
+              University Id
+            </Label>
+            <Input
+              id="universityId"
+              name="universityId"
+              placeholder="ETS000/00"
+              type="text"
+              autoCapitalize="none"
+              autoComplete="given-name"
+              autoCorrect="off"
+              disabled={isLoading}
+              required
+              value={formData.universityId}
+              onChange={handleChange}
+              className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary"
+              style={{ borderColor: "var(--menu-border)" }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="block" className="uppercase text-xs tracking-wider font-medium">
+              Block
+            </Label>
+            <Select
+              value={formData.block}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, block: value }))
+              }
+              required
+            >
+              <input type="hidden" name="block" value={formData.block} />
+              <SelectTrigger id="universityId" className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary">
+                <div className="flex items-center gap-2">
+                  <House className="w-4 h-4 text-gray-500" />
+                  <SelectValue placeholder="Select your block" />
+                </div>
+              </SelectTrigger>
+
+              <SelectContent>
+                {universityBlocks.map((block) => (
+                  <SelectItem key={block.name} value={block.name}>
+                    {block.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="email" className="uppercase text-xs tracking-wider font-medium">
             Email
@@ -158,6 +216,29 @@ export function SignUpForm({
             style={{ borderColor: errors.email ? undefined : "var(--menu-border)" }}
           />
           {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phoneNumber" className="uppercase text-xs tracking-wider font-medium">
+            Phone Number
+          </Label>
+          <Input
+            id="phoneNumber"
+            name="phoneNumber"
+            placeholder="+251*** or 09**"
+            type="text"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect="off"
+            disabled={isLoading}
+            required
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className={`border-2 focus-visible:ring-0 focus-visible:border-menu-primary ${errors.phoneNumber ? "border-red-500" : ""
+              }`}
+            style={{ borderColor: errors.phoneNumber ? undefined : "var(--menu-border)" }}
+          />
+          {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
         </div>
 
         <div className="space-y-2">
@@ -208,32 +289,9 @@ export function SignUpForm({
       <Button
         type="submit"
         className="w-full font-bold uppercase tracking-wider h-12"
-        style={{ backgroundColor: "var(--menu-primary)", color: "white" }}
         disabled={isLoading || !isFormValid}
       >
         {isLoading ? "Creating Account..." : "Create Account"}
-      </Button>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground tracking-wider">Or continue with</span>
-        </div>
-      </div>
-
-      <Button
-        type="button"
-        onClick={() => handleSocial("google")}
-        variant="outline"
-        disabled={isLoading}
-        className="w-full border-2 hover:bg-opacity-10"
-        style={{ borderColor: "var(--menu-border)", color: "var(--menu-secondary)" }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(219, 16, 32, 0.05)")}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-      >
-        Google
       </Button>
     </form>
   )
