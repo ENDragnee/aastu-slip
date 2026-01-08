@@ -93,7 +93,6 @@ export const authOptions: NextAuthOptions = {
         const sessionToken = randomBytes(32).toString("hex");
         const userAgent = await getUserAgent();
 
-        // Create DB session ONCE
         await prisma.session.create({
           data: {
             token: sessionToken,
@@ -110,12 +109,36 @@ export const authOptions: NextAuthOptions = {
         token.universityId = user.universityId;
         token.role = user.role;
         token.name = user.name;
+        token.invalid = false;
+
+        return token;
+      }
+
+      // 🔐 Validate DB session
+      if (!token.token) {
+        token.invalid = true;
+        return token;
+      }
+
+      const session = await prisma.session.findUnique({
+        where: { token: token.token },
+        select: { expiresAt: true },
+      });
+
+      if (!session || session.expiresAt < new Date()) {
+        token.invalid = true;
+        return token;
       }
 
       return token;
     },
 
     async session({ session, token }) {
+      if (token.invalid) {
+        session.user = undefined;
+        session.expires = new Date(0).toISOString();
+        return session;
+      }
       if (session.user) {
         session.user.id = token.id;
         session.user.universityId = token.universityId;
