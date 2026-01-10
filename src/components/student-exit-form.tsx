@@ -31,10 +31,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { UserExitInfo } from "@/types";
+
 // --- Types ---
 interface Item {
   name: string;
   quantity: number;
+}
+
+interface StudentExitFormProps {
+  userInfo: UserExitInfo;
 }
 
 interface FormData {
@@ -67,7 +73,7 @@ const mockSubmitData = async (data: any, isUpdate = false) => {
   });
 };
 
-export default function StudentExitForm() {
+export default function StudentExitForm({ userInfo }: StudentExitFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     studentId: "",
@@ -193,7 +199,7 @@ export default function StudentExitForm() {
             {/* Ensure you have this image in public/AASTU.jpg */}
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-secondary">
               <Image
-                src="/AASTU.jpg"
+                src={userInfo.profileUrl}
                 alt="AASTU Logo"
                 fill
                 className="object-cover"
@@ -218,8 +224,8 @@ export default function StudentExitForm() {
                   <Input
                     id="name"
                     placeholder="e.g. Abebe Kebede"
-                    value={formData.name}
-                    onChange={handleInputChange}
+                    value={userInfo.name}
+                    disabled
                     className="bg-background"
                   />
                 </div>
@@ -228,8 +234,8 @@ export default function StudentExitForm() {
                   <Input
                     id="studentId"
                     placeholder="ETSxxxx/xx"
-                    value={formData.studentId}
-                    onChange={handleInputChange}
+                    value={userInfo.universityId}
+                    disabled
                     className="bg-background"
                   />
                 </div>
@@ -241,8 +247,8 @@ export default function StudentExitForm() {
                   <Input
                     id="block"
                     placeholder="B-44"
-                    value={formData.block}
-                    onChange={handleInputChange}
+                    value={userInfo.block}
+                    disabled
                     className="bg-background"
                   />
                 </div>
@@ -251,8 +257,8 @@ export default function StudentExitForm() {
                   <Input
                     id="dorm"
                     placeholder="101"
-                    value={formData.dorm}
-                    onChange={handleInputChange}
+                    value={userInfo.dormNumber}
+                    disabled
                     className="bg-background"
                   />
                 </div>
