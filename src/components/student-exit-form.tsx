@@ -79,6 +79,7 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
     mutationFn: requestExit,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requestExit"] })
+      setShowSuccessModal(true)
     },
     onError: (err: any) => {
       setError(err.message ?? "Something went wrong. Please try again.");
@@ -89,10 +90,6 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
   const [selectedLaptopIds, setSelectedLaptopIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [pendingSubmission, setPendingSubmission] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
 
   const handleToggleLaptop = (laptopId: string) => {
     setSelectedLaptopIds((prev) =>
@@ -191,7 +188,7 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
           )}
 
           <Button type="submit" className="w-full font-bold text-lg h-12 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" disabled={mutation.isPending} onClick={submitRequest}>
-            {isLoading ? (
+            {mutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
@@ -215,25 +212,6 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
           </DialogHeader>
           <DialogFooter className="sm:justify-center">
             <Button onClick={() => setShowSuccessModal(false)} className="w-full sm:w-auto min-w-30">Done</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Update Modal */}
-      <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-secondary-foreground">
-              <AlertCircle className="h-5 w-5 text-secondary" />
-              Existing Request Found
-            </DialogTitle>
-            <DialogDescription className="pt-2">
-              A request with Student ID <strong>{pendingSubmission?.studentId}</strong> already exists but hasn't been closed.
-              Would you like to update it with these new items?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowUpdateModal(false)}>Cancel</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
