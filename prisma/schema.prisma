@@ -15,16 +15,13 @@ model User {
   phoneNumber  String?
   role         Role
 
-  blockId String?
-  block   Block?  @relation(fields: [blockId], references: [id], onDelete: SetNull)
-
   profile Media?
 
   accounts Account[]
   sessions Session[]
   laptops  Laptop[]
+  dorms    UserDormitory[]
 
-  exitedStudent   Exit[] @relation("StudentId")
   exitsAsStudent  Exit[] @relation("Student")
   exitApprovedBy  Exit[] @relation("ApprovedBy")
   exitValidatedBy Exit[] @relation("ValidatedBy")
@@ -98,13 +95,48 @@ model Block {
   locationId String?   @unique
   location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
-  users User[]
+  dorms Dormitory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([id, name])
   @@map("block")
+}
+
+model Dormitory {
+  id     String     @id @default(cuid())
+  number Int
+  status DormStatus @default(FREE)
+
+  blockId String
+  block   Block  @relation(fields: [blockId], references: [id])
+
+  users UserDormitory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, number])
+  @@map("dormitory")
+}
+
+model UserDormitory {
+  id       String  @id @default(cuid())
+  isActive Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  dormId     String
+  dorm       Dormitory @relation(fields: [dormId], references: [id], onDelete: Cascade)
+  vaildUntil DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("user_dormitory")
 }
 
 model Gate {
@@ -173,22 +205,20 @@ model Exit {
 
   laptops Laptop[]
 
-  studentId           String
-  studentUniversityId String
-  proctorId           String?
-  gateUserId          String?
+  studentId  String
+  proctorId  String?
+  gateUserId String?
 
-  student      User  @relation("Student", fields: [studentId], references: [id])
-  studentUniId User  @relation("StudentId", fields: [studentUniversityId], references: [universityId])
-  proctor      User? @relation("ApprovedBy", fields: [proctorId], references: [id])
-  gateUser     User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
+  student  User  @relation("Student", fields: [studentId], references: [id])
+  proctor  User? @relation("ApprovedBy", fields: [proctorId], references: [id])
+  gateUser User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
 
   exitEvents ExitEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id, studentId, proctorId, gateUserId, studentUniversityId])
+  @@index([id, studentId, proctorId, gateUserId])
   @@map("exit")
 }
 
@@ -240,5 +270,12 @@ enum GateStatus {
   OFFLINE
   ONLINE
   BUSY
+  MAINTENANCE
+}
+
+enum DormStatus {
+  FREE
+  OCCUPIED
+  UNUSABLE
   MAINTENANCE
 }
