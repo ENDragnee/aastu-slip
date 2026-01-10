@@ -35,9 +35,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
-          <Footer />
         </Providers>
-        <SidebarWrapper />
       </body>
     </html>
   );

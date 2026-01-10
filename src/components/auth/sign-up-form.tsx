@@ -1,298 +1,226 @@
-import type React from "react"
-import { useState } from "react"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { AuthErrorDisplay } from "@/components/auth/auth-error"
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "../ui/select"
-import { House } from "lucide-react"
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  User,
+  CreditCard,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  UserPlus
+} from "lucide-react";
 
-interface IUniversityBlock {
-  name: string
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AuthErrorDisplay } from "@/components/auth/auth-error";
+import { signUpSchema, SignUpInput } from "@/lib/validators/sign-up";
+import { cn } from "@/lib/utils"; // Assuming you have this utility from shadcn
 
 export function SignUpForm({
   onSubmit,
   isLoading = false,
-  universityBlocks,
   error = "",
 }: {
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
-  isLoading?: boolean
-  universityBlocks: IUniversityBlock[]
-  error?: string
+  onSubmit: (data: SignUpInput) => Promise<void>;
+  isLoading?: boolean;
+  error?: string;
 }) {
-  const [formData, setFormData] = useState({
-    universityId: "",
-    phoneNumber: "",
-    block: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    firstName: "",
-    lastName: "",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const validateField = (name: string, value: string) => {
-    const newErrors = { ...errors }
-
-    if (name === "email") {
-      if (!value) {
-        newErrors.email = "Email is required"
-      } else if (!isValidEmail(value)) {
-        newErrors.email = "Please enter a valid email address"
-      } else {
-        delete newErrors.email
-      }
-    }
-
-    if (name === "password") {
-      if (!value) {
-        newErrors.password = "Password is required"
-      } else if (value.length < 8) {
-        newErrors.password = "Password must be at least 8 characters"
-      } else {
-        delete newErrors.password
-      }
-      if (formData.confirmPassword && value !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match"
-      } else if (formData.confirmPassword && value === formData.confirmPassword) {
-        delete newErrors.confirmPassword
-      }
-    }
-
-    if (name === "confirmPassword") {
-      if (!value) {
-        newErrors.confirmPassword = "Please confirm your password"
-      } else if (value !== formData.password) {
-        newErrors.confirmPassword = "Passwords do not match"
-      } else {
-        delete newErrors.confirmPassword
-      }
-    }
-
-    setErrors(newErrors)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    validateField(name, value)
-  }
-
-  const isFormValid =
-    formData.email &&
-    formData.password &&
-    formData.confirmPassword &&
-    formData.firstName &&
-    formData.lastName &&
-    Object.keys(errors).length === 0
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+  });
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      {error && <AuthErrorDisplay error={error} />}
+    <div className="w-full max-w-lg mx-auto">
+      {/* Card Container */}
+      <div className="bg-card text-card-foreground rounded-[var(--radius)] shadow-xl border border-border/50 overflow-hidden">
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName" className="uppercase text-xs tracking-wider font-medium">
-              First Name
-            </Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              placeholder="John"
-              type="text"
-              autoCapitalize="none"
-              autoComplete="given-name"
-              autoCorrect="off"
-              disabled={isLoading}
-              required
-              value={formData.firstName}
-              onChange={handleChange}
-              className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary"
-              style={{ borderColor: "var(--menu-border)" }}
-            />
+        {/* Header Section */}
+        <div className="bg-primary/5 p-6 sm:p-8 text-center border-b border-border/50">
+          <div className="mx-auto bg-background h-12 w-12 rounded-full flex items-center justify-center shadow-sm text-primary mb-4 ring-1 ring-border">
+            <UserPlus className="h-6 w-6" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName" className="uppercase text-xs tracking-wider font-medium">
-              Last Name
-            </Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              placeholder="Doe"
-              type="text"
-              autoCapitalize="none"
-              autoComplete="family-name"
-              autoCorrect="off"
-              disabled={isLoading}
-              required
-              value={formData.lastName}
-              onChange={handleChange}
-              className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary"
-              style={{ borderColor: "var(--menu-border)" }}
-            />
-          </div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            Create an Account
+          </h2>
+          <p className="text-muted-foreground text-sm mt-2">
+            Enter your details below to register your profile.
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="universityId" className="uppercase text-xs tracking-wider font-medium">
-              University Id
-            </Label>
-            <Input
-              id="universityId"
-              name="universityId"
-              placeholder="ETS000/00"
-              type="text"
-              autoCapitalize="none"
-              autoComplete="given-name"
-              autoCorrect="off"
-              disabled={isLoading}
-              required
-              value={formData.universityId}
-              onChange={handleChange}
-              className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary"
-              style={{ borderColor: "var(--menu-border)" }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="block" className="uppercase text-xs tracking-wider font-medium">
-              Block
-            </Label>
-            <Select
-              value={formData.block}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, block: value }))
-              }
-              required
-            >
-              <input type="hidden" name="block" value={formData.block} />
-              <SelectTrigger id="universityId" className="border-2 focus-visible:ring-0 focus-visible:border-menu-primary">
-                <div className="flex items-center gap-2">
-                  <House className="w-4 h-4 text-gray-500" />
-                  <SelectValue placeholder="Select your block" />
+        {/* Form Section */}
+        <div className="p-6 sm:p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {error && (
+              <div className="animate-in slide-in-from-top-2 fade-in duration-300">
+                <AuthErrorDisplay error={error} />
+              </div>
+            )}
+
+            {/* Name Fields Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    placeholder="John"
+                    {...register("firstName")}
+                    disabled={isLoading}
+                    className="pl-9 bg-background focus-visible:ring-primary"
+                  />
                 </div>
-              </SelectTrigger>
+                {errors.firstName && <p className="text-destructive text-xs font-medium pl-1">{errors.firstName.message}</p>}
+              </div>
 
-              <SelectContent>
-                {universityBlocks.map((block) => (
-                  <SelectItem key={block.name} value={block.name}>
-                    {block.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    placeholder="Doe"
+                    {...register("lastName")}
+                    disabled={isLoading}
+                    className="pl-9 bg-background focus-visible:ring-primary"
+                  />
+                </div>
+                {errors.lastName && <p className="text-destructive text-xs font-medium pl-1">{errors.lastName.message}</p>}
+              </div>
+            </div>
 
-          </div>
-        </div>
+            {/* University ID */}
+            <div className="space-y-2">
+              <Label htmlFor="universityId">University ID</Label>
+              <div className="relative">
+                <CreditCard className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="universityId"
+                  placeholder="ETS/xxxx/xx"
+                  {...register("universityId")}
+                  disabled={isLoading}
+                  className="pl-9 bg-background focus-visible:ring-primary"
+                />
+              </div>
+              {errors.universityId && <p className="text-destructive text-xs font-medium pl-1">{errors.universityId.message}</p>}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="uppercase text-xs tracking-wider font-medium">
-            Email
-          </Label>
-          <Input
-            id="email"
-            name="email"
-            placeholder="name@example.com"
-            type="email"
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect="off"
-            disabled={isLoading}
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className={`border-2 focus-visible:ring-0 focus-visible:border-menu-primary ${errors.email ? "border-red-500" : ""
-              }`}
-            style={{ borderColor: errors.email ? undefined : "var(--menu-border)" }}
-          />
-          {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-        </div>
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="student@university.edu.et"
+                  {...register("email")}
+                  disabled={isLoading}
+                  className="pl-9 bg-background focus-visible:ring-primary"
+                />
+              </div>
+              {errors.email && <p className="text-destructive text-xs font-medium pl-1">{errors.email.message}</p>}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phoneNumber" className="uppercase text-xs tracking-wider font-medium">
-            Phone Number
-          </Label>
-          <Input
-            id="phoneNumber"
-            name="phoneNumber"
-            placeholder="+251*** or 09**"
-            type="text"
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect="off"
-            disabled={isLoading}
-            required
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className={`border-2 focus-visible:ring-0 focus-visible:border-menu-primary ${errors.phoneNumber ? "border-red-500" : ""
-              }`}
-            style={{ borderColor: errors.phoneNumber ? undefined : "var(--menu-border)" }}
-          />
-          {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
-        </div>
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phoneNumber"
+                  placeholder="+251 911 22 33 44"
+                  {...register("phoneNumber")}
+                  disabled={isLoading}
+                  className="pl-9 bg-background focus-visible:ring-primary"
+                />
+              </div>
+              {errors.phoneNumber && <p className="text-destructive text-xs font-medium pl-1">{errors.phoneNumber.message}</p>}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password" className="uppercase text-xs tracking-wider font-medium">
-            Password
-          </Label>
-          <Input
-            id="password"
-            name="password"
-            placeholder="••••••••"
-            type="password"
-            autoCapitalize="none"
-            autoComplete="new-password"
-            disabled={isLoading}
-            required
-            value={formData.password}
-            onChange={handleChange}
-            className={`border-2 focus-visible:ring-0 focus-visible:border-menu-primary ${errors.password ? "border-red-500" : ""
-              }`}
-            style={{ borderColor: errors.password ? undefined : "var(--menu-border)" }}
-          />
-          {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-        </div>
+            {/* Password */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  disabled={isLoading}
+                  className="pl-9 pr-10 bg-background focus-visible:ring-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-destructive text-xs font-medium pl-1">{errors.password.message}</p>}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="uppercase text-xs tracking-wider font-medium">
-            Confirm Password
-          </Label>
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="••••••••"
-            type="password"
-            autoCapitalize="none"
-            autoComplete="new-password"
-            disabled={isLoading}
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className={`border-2 focus-visible:ring-0 focus-visible:border-menu-primary ${errors.confirmPassword ? "border-red-500" : ""
-              }`}
-            style={{ borderColor: errors.confirmPassword ? undefined : "var(--menu-border)" }}
-          />
-          {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  {...register("confirmPassword")}
+                  disabled={isLoading}
+                  className="pl-9 pr-10 bg-background focus-visible:ring-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-destructive text-xs font-medium pl-1">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className={cn(
+                "w-full font-bold text-base h-11 mt-2 shadow-md transition-all",
+                "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg active:scale-[0.98]"
+              )}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </Button>
+          </form>
         </div>
       </div>
-
-      <Button
-        type="submit"
-        className="w-full font-bold uppercase tracking-wider h-12"
-        disabled={isLoading || !isFormValid}
-      >
-        {isLoading ? "Creating Account..." : "Create Account"}
-      </Button>
-    </form>
-  )
+    </div>
+  );
 }

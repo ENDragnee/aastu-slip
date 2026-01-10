@@ -1,138 +1,157 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import type React from "react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { ArrowRight, GraduationCap, ChevronLeft } from "lucide-react";
 
-import Link from "next/link"
-import { SignInForm } from "@/components/auth/sign-in-form"
-import { useRouter } from "next/navigation"
-import { z } from "zod"
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { Button } from "@/components/ui/button";
 
-export function SignInView() {
+// Schema Validation
+const signInSchema = z.object({
+  universityId: z
+    .string()
+    .min(4, "ID is too short")
+    .regex(/^ets\d{4}\/\d+$/i, "Invalid format. Expected ETSxxxx/xx"),
+  password: z.string().min(1, "Password is required"),
+});
 
-  const [isLoading, setIsLoading] = useState(Boolean);
-  const [error, setError] = useState(String);
+export default function SignInView() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const signInSchema = z.object({
-    universityId: z.string().min(4).regex(/^ets\d{4}\/\d+$/i,
-      "Invalid format. Expected ETS0000/00"),
-    password: z.string().min(8)
-  })
-
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const formData = new FormData(e.currentTarget);
     const formUniversityId = formData.get("universityId") as string;
     const formPassword = formData.get("password") as string;
 
+    // Client-side Validation
     const validatedFields = signInSchema.safeParse({
       universityId: formUniversityId,
-      password: formPassword
-    })
+      password: formPassword,
+    });
+
     if (!validatedFields.success) {
-      setError("Please enter a proper value");
-      setIsLoading(false)
+      // FIX: Use .issues instead of .errors
+      setError(validatedFields.error.issues[0].message);
+      setIsLoading(false);
+      return;
     }
-    else {
-      try {
-        const universityId = validatedFields.data?.universityId
-        const password = validatedFields.data?.password
-        const result = await signIn('credentials', {
-          universityId,
-          password,
-          redirect: false,
-        });
-        if (result?.error) {
-          setError("Incorrect University Id or Password");
-        }
-        else if (result?.ok) {
-          router.push("/dashboard")
-        }
-        else {
-          setError("An unexpected issue occurred during sign in.");
-        }
-      } catch (err) {
-        setError(
-          `Authentication error: ${err instanceof Error ? err.message : "Unknown error"
-          }`
-        );
-      } finally {
-        setIsLoading(false);
+
+    try {
+      // Normalize ID to lowercase to match DB storage convention
+      const universityId = validatedFields.data.universityId.toLowerCase();
+      const password = validatedFields.data.password;
+
+      const result = await signIn("credentials", {
+        universityId,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Incorrect University ID or Password.");
+      } else if (result?.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        setError("An unexpected issue occurred during sign in.");
       }
+    } catch (err) {
+      setError(
+        `Authentication error: ${err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
+
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Image/Brand */}
-      <div className="hidden lg:flex flex-1 bg-menu-background relative overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            <div className="absolute -top-20 -left-20 w-64 h-64 bg-menu-primary opacity-10" />
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-menu-primary opacity-10" />
-            <div className="relative z-10 text-center space-y-6 p-12">
-              <h2 className="text-6xl font-bold tracking-[0.3em] uppercase" style={{ color: "var(--menu-secondary)" }}>
-                Welcome Back
-              </h2>
-              <p className="text-xl tracking-wider uppercase" style={{ color: "var(--menu-secondary)" }}>
-                Keep Making Your Life Easy
-              </p>
-              <div className="pt-8">
-                <div className="inline-block px-8 py-4" style={{ backgroundColor: "var(--menu-primary)" }}>
-                  <span className="font-bold tracking-wider uppercase text-white">Menu Collection</span>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen w-full grid lg:grid-cols-2 overflow-hidden bg-background">
+
+      {/* Left Panel - Branding (Hidden on Mobile) */}
+      <div className="hidden lg:flex flex-col justify-between bg-primary p-10 text-primary-foreground relative">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+
+        <div className="flex items-center gap-2 z-10">
+          <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+            <GraduationCap className="h-6 w-6 text-white" />
           </div>
+          <span className="text-xl font-bold tracking-tight">AASTU Exit System</span>
+        </div>
+
+        <div className="z-10 max-w-md">
+          <h2 className="text-4xl font-extrabold mb-4 leading-tight">
+            Welcome
+            <span className="text-secondary block mt-1">Back!</span>
+          </h2>
+          <p className="text-primary-foreground/80 text-lg leading-relaxed">
+            Log in to check your clearance status, manage your dormitory details, and view exit history.
+          </p>
+        </div>
+
+        <div className="z-10 flex items-center gap-4 text-sm text-primary-foreground/60">
+          <p>© {new Date().getFullYear()} AASTU Student Services</p>
         </div>
       </div>
 
-      {/* Right side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-12">
-            <Link href="/" className="inline-block">
-              <div className="flex items-center gap-2 mb-8">
-                <div
-                  className="w-8 h-8 flex items-center justify-center"
-                  style={{ backgroundColor: "var(--menu-primary)" }}
-                >
-                  <span className="text-white font-bold text-xl">KK</span>
-                </div>
-                <span
-                  className="text-2xl font-bold tracking-[0.2em] uppercase"
-                  style={{ color: "var(--menu-secondary)" }}
-                >
-                  YELLOW
-                </span>
-              </div>
+      {/* Right Panel - Form (Scrollable) */}
+      <div className="relative flex flex-col items-center justify-center p-6 sm:p-10 lg:p-16 overflow-y-auto">
+
+        <div className="lg:hidden w-full max-w-lg mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <GraduationCap className="h-6 w-6 text-primary" />
+            </div>
+            <span className="font-bold text-foreground">AASTU</span>
+          </div>
+        </div>
+
+        <div className="absolute top-6 left-6 lg:top-10 lg:left-10 hidden sm:block">
+          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-primary" asChild>
+            <Link href="/">
+              <ChevronLeft className="h-4 w-4" />
+              Back to Home
             </Link>
-            <h1 className="text-4xl font-bold tracking-tight mb-2" style={{ color: "var(--menu-secondary)" }}>
-              Welcome Back
+          </Button>
+        </div>
+
+        <div className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="mb-8 text-center sm:text-left">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Sign In
             </h1>
-            <p className="text-muted-foreground">Sign in to your account</p>
+            <p className="text-muted-foreground mt-2">
+              Enter your credentials to access your account.
+            </p>
           </div>
 
           <SignInForm onSubmit={onSubmit} isLoading={isLoading} error={error} />
 
-          <div className="mt-8 text-center text-sm">
-            <span className="text-muted-foreground">{"Don't have an account?"}</span>
-            <Link
-              href="/auth?view=signup"
-              className="font-medium hover:underline underline-offset-4"
-              style={{ color: "var(--menu-primary)" }}
-            >
-              Sign up
-            </Link>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/auth/sign-up"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1 group"
+              >
+                Sign up
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-export default SignInView
