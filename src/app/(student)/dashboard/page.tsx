@@ -38,7 +38,6 @@ export default async function StudentExitPage() {
     profileUrl: data?.user.profile?.url || "/AASTU.jpg"
   }
 
-  console.log(userInfo);
   return (
     <main className="min-h-screen w-full bg-background flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 

@@ -12,3 +12,13 @@ export interface UserExitInfo {
   dormNumber?: number;
   profileUrl: string;
 }
+
+export interface SelectedItem {
+  name: string;
+  quantity: number;
+}
+
+export interface ItemOption {
+  name: string;
+  description: string;
+}
