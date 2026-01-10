@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/card";
 
 import { UserExitInfo } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UserInformation } from "./student/dashboard/user-information-card";
 import { SelectedItems } from "./student/dashboard/selected-items-list";
@@ -30,6 +30,18 @@ import { LaptopSelector, LaptopItem } from "@/components/student/dashboard/lapto
 import { ItemsList } from "./student/dashboard/items-list";
 import { ItemOption } from "@/types";
 import { SelectedItem } from "@/types";
+
+export interface ExitRequest {
+  items: SelectedItem[];
+  laptops: string[];
+}
+
+const requestExit = async (exitRequest: ExitRequest) => {
+  const res = await axios.post("/api/requests", {
+    exitRequest
+  })
+  return res;
+}
 
 const fetchItems = async (): Promise<ItemOption[]> => {
   const res = await axios("/api/properties");
@@ -51,6 +63,8 @@ const fetchLaptops = async (): Promise<LaptopItem[]> => {
 };
 
 export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }) {
+
+  const queryClient = useQueryClient();
   const { data, isLoading: itemsIsLoading } = useQuery<ItemOption[]>({
     queryKey: ["items"],
     queryFn: fetchItems,
@@ -61,6 +75,16 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
     queryFn: fetchLaptops,
   });
 
+  const mutation = useMutation({
+    mutationFn: requestExit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["requestExit"] })
+    },
+    onError: (err: any) => {
+      setError(err.message ?? "Something went wrong. Please try again.");
+    },
+  });
+
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [selectedLaptopIds, setSelectedLaptopIds] = useState<string[]>([]);
   const [error, setError] = useState("");
@@ -68,6 +92,7 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
 
   const handleToggleLaptop = (laptopId: string) => {
     setSelectedLaptopIds((prev) =>
@@ -92,6 +117,16 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
         i === index ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
       )
     );
+  };
+
+  const submitRequest = () => {
+    const requestData: ExitRequest = {
+      items: selectedItems,
+      laptops: selectedLaptopIds,
+    };
+    console.log(requestData);
+
+    mutation.mutate(requestData);
   };
 
   const removeItem = (index: number) => {
@@ -155,7 +190,7 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
             </motion.div>
           )}
 
-          <Button type="submit" className="w-full font-bold text-lg h-12 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" disabled={isLoading}>
+          <Button type="submit" className="w-full font-bold text-lg h-12 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" disabled={mutation.isPending} onClick={submitRequest}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

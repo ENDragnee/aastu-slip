@@ -14,6 +14,7 @@ export interface UserExitInfo {
 }
 
 export interface SelectedItem {
+  id?: string;
   name: string;
   quantity: number;
 }

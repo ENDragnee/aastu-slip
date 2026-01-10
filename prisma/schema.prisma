@@ -224,6 +224,7 @@ model Exit {
 model ExitProperty {
   exitId     String
   propertyId String
+  quantity   Int
 
   exit     Exit     @relation(fields: [exitId], references: [id], onDelete: Cascade)
   property Property @relation(fields: [propertyId], references: [id])

@@ -5,6 +5,7 @@ export async function GET() {
   try {
     const properties = await prisma.property.findMany({
       select: {
+        id: true,
         name: true,
         description: true,
       },
