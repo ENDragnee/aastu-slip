@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { UserInformation } from "./student/dashboard/user-information-card";
 import { SelectedItems } from "./student/dashboard/selected-items-list";
+import { LaptopSelector, LaptopItem } from "@/components/student/dashboard/laptop-selector";
 import { ItemsList } from "./student/dashboard/items-list";
 import { ItemOption } from "@/types";
 import { SelectedItem } from "@/types";
@@ -35,17 +36,46 @@ const fetchItems = async (): Promise<ItemOption[]> => {
   return Array.isArray(res.data.properties) ? res.data.properties : [];
 };
 
+const fetchLaptops = async (): Promise<LaptopItem[]> => {
+  const res = await axios("/api/laptops/users");
+
+  if (res.data?.laptops && Array.isArray(res.data.laptops)) {
+    return res.data.laptops;
+  }
+
+  if (res.data && typeof res.data === 'object') {
+    return Object.values(res.data) as LaptopItem[];
+  }
+
+  return [];
+};
+
 export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }) {
   const { data, isLoading: itemsIsLoading } = useQuery<ItemOption[]>({
     queryKey: ["items"],
     queryFn: fetchItems,
   });
+
+  const { data: laptops, isLoading: laptopsIsLoading } = useQuery<LaptopItem[]>({
+    queryKey: ["laptops"],
+    queryFn: fetchLaptops,
+  });
+
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectedLaptopIds, setSelectedLaptopIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleToggleLaptop = (laptopId: string) => {
+    setSelectedLaptopIds((prev) =>
+      prev.includes(laptopId)
+        ? prev.filter(id => id !== laptopId)
+        : [...prev, laptopId]
+    );
+  };
 
   const addItem = (itemName: string) => {
     if (selectedItems.some((i) => i.name === itemName)) {
@@ -98,6 +128,13 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
               </span>
             </div>
           </div>
+
+          <LaptopSelector
+            laptops={laptops || []}
+            selectedLaptopIds={selectedLaptopIds}
+            onToggleLaptop={handleToggleLaptop}
+            isLoading={laptopsIsLoading}
+          />
 
           <div className="space-y-4">
             {itemsIsLoading ? (

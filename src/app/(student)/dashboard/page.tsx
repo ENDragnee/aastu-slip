@@ -43,7 +43,7 @@ export default async function StudentExitPage() {
 
       <div className="absolute top-[-10%] left-[-10%] w-125 h-125 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-125 h-125 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
-      <StudentExitForm userInfo={userInfo} />)
+      <StudentExitForm userInfo={userInfo} />
     </main>
   );
 }
