@@ -169,16 +169,15 @@ model Laptop {
   model        String
   manufacturer String
 
-  studentUniversityId String?
-  student             User?   @relation(fields: [studentUniversityId], references: [universityId], onDelete: SetNull)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  exitId String?
-  exit   Exit?   @relation(fields: [exitId], references: [id], onDelete: SetNull)
+  exit LaptopExit[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([studentUniversityId, serialNumber, exitId])
+  @@index([serialNumber])
   @@map("laptop")
 }
 
@@ -203,7 +202,7 @@ model Exit {
 
   properties ExitProperty[]
 
-  laptops Laptop[]
+  laptops LaptopExit[]
 
   studentId  String
   proctorId  String?
@@ -230,7 +229,18 @@ model ExitProperty {
   property Property @relation(fields: [propertyId], references: [id])
 
   @@id([exitId, propertyId])
-  @@map("exit_propery")
+  @@map("exit_property")
+}
+
+model LaptopExit {
+  laptopId String
+  exitId   String
+
+  exit   Exit   @relation(fields: [exitId], references: [id], onDelete: Cascade)
+  laptop Laptop @relation(fields: [laptopId], references: [id])
+
+  @@id([exitId, laptopId])
+  @@map("laptop_exit")
 }
 
 model ExitEvent {
