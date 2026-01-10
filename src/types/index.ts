@@ -22,3 +22,9 @@ export interface ItemOption {
   name: string;
   description: string;
 }
+
+export interface RouteParam {
+  params: Promise<{
+    id: string;
+  }>;
+}

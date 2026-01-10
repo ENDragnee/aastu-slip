@@ -11,3 +11,9 @@ export async function getSession() {
 
   return session;
 }
+
+export async function getApiSession() {
+  const session = await getServerSession(authOptions);
+
+  return session;
+}
