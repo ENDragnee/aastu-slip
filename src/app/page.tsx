@@ -1,15 +1,12 @@
-import React from 'react'
-import Student from '@/components/student-item-management'
-import Footer  from "@/components/footer"
+import LoadingAnimation from '@/components/loading'
 
 
-const page = () => {
+const Landingpage = () => {
   return (
     <div>
-      <Student/>
-      <Footer/>
+      <LoadingAnimation />
     </div>
   )
 }
 
-export default page
+export default Landingpage

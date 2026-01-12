@@ -10,6 +10,7 @@ import { ArrowRight, GraduationCap, ChevronLeft } from "lucide-react";
 
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { Button } from "@/components/ui/button";
+import { redirector } from "@/actions/redirector";
 
 // Schema Validation
 const signInSchema = z.object({
@@ -23,7 +24,6 @@ const signInSchema = z.object({
 export default function SignInView() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,8 +61,7 @@ export default function SignInView() {
       if (result?.error) {
         setError("Incorrect University ID or Password.");
       } else if (result?.ok) {
-        router.push("/dashboard");
-        router.refresh();
+        redirector();
       } else {
         setError("An unexpected issue occurred during sign in.");
       }

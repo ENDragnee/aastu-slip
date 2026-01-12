@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveAs } from "file-saver";
 import Image from "next/image"; // Import the Image component
-import aastuImage from '/public/AASTU.jpg'
-import Footer  from "@/components/footer"
-
+import Footer from "@/components/footer";
 
 import {
   Card,
@@ -29,8 +27,13 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
-
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ProctorsDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,9 +52,9 @@ export default function ProctorsDashboard() {
 
   const formatStudentId = (studentId) => {
     // Regular expressions for the valid formats
-    const etsPattern = /^ETS\d{4}\/\d{2}$/i;  // Case insensitive
+    const etsPattern = /^ETS\d{4}\/\d{2}$/i; // Case insensitive
     const numberPattern = /^\d{4}\/\d{2}$/;
-    
+
     if (etsPattern.test(studentId)) {
       return studentId.toUpperCase(); // Normalize to uppercase
     } else if (numberPattern.test(studentId)) {
@@ -110,7 +113,9 @@ export default function ProctorsDashboard() {
       const formattedSearchTerm = formatStudentId(searchTerm);
       setSearchTerm(formattedSearchTerm);
 
-      const response = await fetch(`/api/requests?studentId=${formattedSearchTerm}`);
+      const response = await fetch(
+        `/api/requests?studentId=${formattedSearchTerm}`,
+      );
       if (!response.ok) {
         throw new Error("Student not found");
       }
@@ -123,11 +128,11 @@ export default function ProctorsDashboard() {
         exitDate: new Date(data.DateOfRequest).toLocaleDateString(),
         items: data.Items,
         status: data.Status,
-        shortCode: data.ShortCode ?? ""
+        shortCode: data.ShortCode ?? "",
       });
-      
+
       // Set isAuthorized based on the status
-      setIsAuthorized(data.Status === 'Authorized');
+      setIsAuthorized(data.Status === "Authorized");
     } catch (err) {
       setError(err.message);
       setSelectedStudent(null);
@@ -165,9 +170,9 @@ export default function ProctorsDashboard() {
       setShortCode(data.shortCode);
 
       // Update the selected student's status
-      setSelectedStudent(prev => ({
+      setSelectedStudent((prev) => ({
         ...prev,
-        status: 'Authorized'
+        status: "Authorized",
       }));
 
       setShowConfirmModal(false);
@@ -176,36 +181,41 @@ export default function ProctorsDashboard() {
       setError("Failed to authorize: " + err.message);
     }
   };
-  
+
   const handleDeny = async () => {
     try {
       setDenyError(null);
-      const response = await fetch(`/api/deny?studentId=${selectedStudent.id}`, {
-        method: "DELETE",
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/deny?studentId=${selectedStudent.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
-  
+      );
+
       // First check if the response is JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error("Server returned non-JSON response");
       }
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || "Failed to deny request");
       }
-  
+
       // Clear the selected student and show success message
       setSelectedStudent(null);
       setSearchTerm("");
       setShowDenyModal(false);
     } catch (err) {
       console.error("Deny request error:", err);
-      setDenyError(err.message || "An error occurred while denying the request");
+      setDenyError(
+        err.message || "An error occurred while denying the request",
+      );
     }
   };
 
@@ -215,7 +225,7 @@ export default function ProctorsDashboard() {
         <div className="flex flex-col lg:flex-row justify-between items-center">
           <div className="mb-6 lg:mb-0">
             <Image
-              src={aastuImage}
+              src="/AASTU.jpg"
               alt="AASTU Logo"
               width={200} // Adjust the width
               height={160} // Adjust the height
@@ -239,7 +249,7 @@ export default function ProctorsDashboard() {
       </header>
 
       <main>
-      <div className="flex flex-col lg:flex-row items-center gap-4 mb-4">
+        <div className="flex flex-col lg:flex-row items-center gap-4 mb-4">
           <Select
             onValueChange={(value) => setExportOption(value)}
             value={exportOption}
@@ -303,8 +313,8 @@ export default function ProctorsDashboard() {
                   className="pl-8 border-[#cccccc] text-[#003366] placeholder-[#003366]/50"
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
               >
@@ -316,26 +326,39 @@ export default function ProctorsDashboard() {
         {selectedStudent && (
           <Card className="border-[#cccccc]">
             <CardHeader>
-              <CardTitle className="text-[#003366]">{selectedStudent.name}</CardTitle>
+              <CardTitle className="text-[#003366]">
+                {selectedStudent.name}
+              </CardTitle>
               <CardDescription className="text-[#003366]/70">
                 Student ID: {selectedStudent.id}
-                <div className={`mt-2 inline-block px-2 py-1 rounded-full text-sm ${
-                  selectedStudent.status === 'Authorized' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <div
+                  className={`mt-2 inline-block px-2 py-1 rounded-full text-sm ${
+                    selectedStudent.status === "Authorized"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
                   Status: {selectedStudent.status}
                 </div>
               </CardDescription>
-                <CardTitle className="text-[#003366]">Short Code: {selectedStudent.shortCode}</CardTitle>
+              <CardTitle className="text-[#003366]">
+                Short Code: {selectedStudent.shortCode}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-[#003366]">Requested Date: {selectedStudent.exitDate}</p>
-              <h3 className="font-semibold mb-2 text-[#003366]">Items to Take Home:</h3>
+              <p className="mb-4 text-[#003366]">
+                Requested Date: {selectedStudent.exitDate}
+              </p>
+              <h3 className="font-semibold mb-2 text-[#003366]">
+                Items to Take Home:
+              </h3>
               <ScrollArea className="h-[200px] rounded-md border border-[#cccccc] p-4">
                 <ul className="space-y-2">
                   {selectedStudent.items.map((item, index) => (
-                    <li key={index} className="flex justify-between items-center">
+                    <li
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
                       <span className="text-[#003366]">{item.name}</span>
                       <span className="bg-[#cccccc] text-[#003366] px-2 py-1 rounded-full text-sm">
                         {item.quantity}
@@ -346,8 +369,8 @@ export default function ProctorsDashboard() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="flex justify-end space-x-2">
-              {selectedStudent.status !== 'Exited' && (
-              <Button
+              {selectedStudent.status !== "Exited" && (
+                <Button
                   className="bg-red-600 text-white hover:bg-red-700"
                   onClick={() => setShowDenyModal(true)}
                 >
@@ -356,8 +379,8 @@ export default function ProctorsDashboard() {
               )}
               <Button
                 className={`${
-                  isAuthorized 
-                    ? "bg-gray-400 cursor-not-allowed" 
+                  isAuthorized
+                    ? "bg-gray-400 cursor-not-allowed"
                     : "bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                 }`}
                 disabled={isAuthorized || selectedStudent.status == "Exited"}
@@ -365,24 +388,29 @@ export default function ProctorsDashboard() {
               >
                 {isAuthorized ? "Authorized" : "Authorize"}
               </Button>
-              <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+              <Dialog
+                open={showConfirmModal}
+                onOpenChange={setShowConfirmModal}
+              >
                 <DialogContent className="bg-white border-[#cccccc]">
                   <DialogHeader>
-                    <DialogTitle className="text-[#003366]">Confirm Authorization</DialogTitle>
+                    <DialogTitle className="text-[#003366]">
+                      Confirm Authorization
+                    </DialogTitle>
                     <DialogDescription className="text-[#003366]/70">
                       Are you sure you want to authorize the items for{" "}
                       {selectedStudent.name}?
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => setShowConfirmModal(false)}
                       className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white"
                     >
                       Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleAuthorize}
                       className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                     >
@@ -395,19 +423,20 @@ export default function ProctorsDashboard() {
               <Dialog open={showDenyModal} onOpenChange={setShowDenyModal}>
                 <DialogContent className="bg-white border-[#cccccc]">
                   <DialogHeader>
-                    <DialogTitle className="text-[#003366]">Confirm Denial</DialogTitle>
+                    <DialogTitle className="text-[#003366]">
+                      Confirm Denial
+                    </DialogTitle>
                     <DialogDescription className="text-[#003366]/70">
-                      Are you sure you want to deny the request for {selectedStudent?.name}? This action cannot be undone.
+                      Are you sure you want to deny the request for{" "}
+                      {selectedStudent?.name}? This action cannot be undone.
                     </DialogDescription>
                   </DialogHeader>
                   {denyError && (
-                    <div className="text-red-600 text-sm mt-2">
-                      {denyError}
-                    </div>
+                    <div className="text-red-600 text-sm mt-2">{denyError}</div>
                   )}
                   <DialogFooter>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => {
                         setShowDenyModal(false);
                         setDenyError(null);
@@ -416,7 +445,7 @@ export default function ProctorsDashboard() {
                     >
                       Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleDeny}
                       className="bg-red-600 text-white hover:bg-red-700"
                     >
@@ -432,14 +461,18 @@ export default function ProctorsDashboard() {
           <Dialog open={showShortCode} onOpenChange={setShowShortCode}>
             <DialogContent className="bg-white border-[#cccccc]">
               <DialogHeader>
-                <DialogTitle className="text-[#003366]">Authorization Successful</DialogTitle>
-                <DialogDescription className="text-[#003366]/70">Your short code is:</DialogDescription>
+                <DialogTitle className="text-[#003366]">
+                  Authorization Successful
+                </DialogTitle>
+                <DialogDescription className="text-[#003366]/70">
+                  Your short code is:
+                </DialogDescription>
                 <div className="mt-4 text-2xl font-bold text-center text-green-600">
                   {shortCode}
                 </div>
               </DialogHeader>
               <DialogFooter>
-                <Button 
+                <Button
                   onClick={() => setShowShortCode(false)}
                   className="bg-[#b8860b] text-white hover:bg-[#b8860b]/90"
                 >
@@ -450,7 +483,7 @@ export default function ProctorsDashboard() {
           </Dialog>
         )}
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
