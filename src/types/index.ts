@@ -14,12 +14,13 @@ export interface UserExitInfo {
 }
 
 export interface SelectedItem {
-  id?: string;
+  id: string;
   name: string;
   quantity: number;
 }
 
 export interface ItemOption {
+  id: string;
   name: string;
   description: string;
 }

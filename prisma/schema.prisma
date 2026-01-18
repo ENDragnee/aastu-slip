@@ -17,6 +17,9 @@ model User {
 
   profile Media?
 
+  blockId String?
+  block   Block?  @relation(fields: [blockId], references: [id])
+
   accounts Account[]
   sessions Session[]
   laptops  Laptop[]
@@ -96,6 +99,7 @@ model Block {
   location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
   dorms Dormitory[]
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,7 +121,7 @@ model Dormitory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id, number])
+  @@index([id, number, blockId])
   @@map("dormitory")
 }
 
@@ -135,7 +139,7 @@ model UserDormitory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, isActive])
+  @@index([userId, isActive, dormId])
   @@map("user_dormitory")
 }
 

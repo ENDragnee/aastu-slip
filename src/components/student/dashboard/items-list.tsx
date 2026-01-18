@@ -5,10 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 export interface ItemOption {
+  id: string;
   name: string;
   description: string;
 }
-export function ItemsList({ items, addItem }: { items: ItemOption[]; addItem: (itemName: string) => void }) {
+export function ItemsList({ items, addItem }: { items: ItemOption[]; addItem: (itemId: string, itemName: string) => void }) {
   const [search, setSearch] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -27,7 +28,7 @@ export function ItemsList({ items, addItem }: { items: ItemOption[]; addItem: (i
           <div className="text-sm text-muted-foreground text-center py-2">No items found.</div>
         ) : (
           filteredItems.map((item) => (
-            <button key={item.name} type="button" className="w-full text-left p-2 rounded hover:bg-primary/10 flex flex-col sm:flex-row sm:justify-between sm:items-center" onClick={() => addItem(item.name)}>
+            <button key={item.name} type="button" className="w-full text-left p-2 rounded hover:bg-primary/10 flex flex-col sm:flex-row sm:justify-between sm:items-center" onClick={() => addItem(item.id, item.name)}>
               <span className="font-medium">{item.name}</span>
               <span className="text-xs text-muted-foreground mt-1 sm:mt-0">{item.description}</span>
             </button>

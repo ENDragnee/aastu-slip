@@ -73,10 +73,15 @@ export async function POST(request: NextRequest) {
         propertyId: item.id!,
         quantity: item.quantity,
       }));
+    console.log("items from frontend: ", items);
+    console.log(propertyData);
 
     const laptopData = laptops.map((laptopId) => ({
       laptopId: laptopId,
     }));
+
+    console.log("laptops from frontend: ", laptops);
+    console.log(laptopData);
 
     const requestExit = await prisma.exit.create({
       data: {

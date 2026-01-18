@@ -99,12 +99,12 @@ export default function StudentExitForm({ userInfo }: { userInfo: UserExitInfo }
     );
   };
 
-  const addItem = (itemName: string) => {
+  const addItem = (itemId: string, itemName: string) => {
     if (selectedItems.some((i) => i.name === itemName)) {
       setError("Item already added.");
       return;
     }
-    setSelectedItems((prev) => [...prev, { name: itemName, quantity: 1 }]);
+    setSelectedItems((prev) => [...prev, { id: itemId, name: itemName, quantity: 1 }]);
     setError("");
   };
 
