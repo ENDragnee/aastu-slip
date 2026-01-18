@@ -3,11 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
 import { randomInt } from "crypto";
 import { SelectedItem } from "@/types";
-import { Role } from "@/generated/prisma/enums";
+import { ExitStatus, Role } from "@/generated/prisma/enums";
 
 const exitCodeGenerator = () => {
   return String(randomInt(0, 10000)).padStart(6, "0");
 };
+const TIMEGAP = 24 * 60 * 60 * 1000;
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,40 +74,71 @@ export async function POST(request: NextRequest) {
         propertyId: item.id!,
         quantity: item.quantity,
       }));
-    console.log("items from frontend: ", items);
-    console.log(propertyData);
 
     const laptopData = laptops.map((laptopId) => ({
       laptopId: laptopId,
     }));
 
-    console.log("laptops from frontend: ", laptops);
-    console.log(laptopData);
+    const result = await prisma.$transaction(async (tx) => {
+      const lastRequest = await tx.exit.findFirst({
+        where: {
+          studentId: userId,
+          currentStatus: ExitStatus.REQUESTED,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
-    const requestExit = await prisma.exit.create({
-      data: {
-        studentId: userId,
-        exitCode: exitCodeGenerator(),
+      if (lastRequest) {
+        const timeDiff = Date.now() - lastRequest.createdAt.getTime();
 
-        properties: {
-          createMany: {
-            data: propertyData,
+        if (timeDiff < TIMEGAP) {
+          throw new Error("REQUEST_LIMIT");
+        }
+      }
+
+      return tx.exit.create({
+        data: {
+          studentId: userId,
+          exitCode: exitCodeGenerator(),
+
+          properties: {
+            createMany: {
+              data: propertyData,
+            },
+          },
+
+          laptops: {
+            createMany: {
+              data: laptopData,
+            },
+          },
+
+          exitEvents: {
+            create: {
+              status: ExitStatus.REQUESTED,
+            },
           },
         },
-
-        laptops: {
-          createMany: {
-            data: laptopData,
-          },
+        include: {
+          properties: true,
+          laptops: true,
+          exitEvents: true,
         },
-      },
-      include: {
-        properties: true,
-        laptops: true,
-      },
+      });
     });
-    return NextResponse.json({ requestExit }, { status: 201 });
-  } catch (err) {
+    return NextResponse.json({ requestExit: result }, { status: 201 });
+  } catch (err: any) {
+    if (err.message === "REQUEST_LIMIT") {
+      return NextResponse.json(
+        {
+          error: "You already have a pending request within the last 24 hours",
+        },
+        { status: 403 },
+      );
+    }
+
     console.error("Error creating exit request:", err);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
