@@ -30,6 +30,7 @@ export async function GET(request: NextRequest, { params }: RouteParam) {
     const exitingStudent = await prisma.exit.findFirst({
       where: {
         exitCode: exitCode,
+        currentStatus: ExitStatus.APPROVED,
       },
 
       include: {
