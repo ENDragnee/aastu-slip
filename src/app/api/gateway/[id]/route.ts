@@ -85,7 +85,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
     const exited = await prisma.exit.update({
       where: {
         exitCode: exitCode,
-        currentStatus: ExitStatus.APPROVED,
+        currentStatus: approvedStatus,
       },
 
       data: {
