@@ -1,0 +1,296 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String  @id @default(cuid())
+  name         String
+  universityId String  @unique
+  email        String? @unique
+  phoneNumber  String?
+  role         Role
+
+  profile Media?
+
+  blockId String?
+  block   Block?  @relation(fields: [blockId], references: [id])
+
+  accounts Account[]
+  sessions Session[]
+  laptops  Laptop[]
+  dorms    UserDormitory[]
+
+  exitsAsStudent  Exit[] @relation("Student")
+  exitApprovedBy  Exit[] @relation("ApprovedBy")
+  exitValidatedBy Exit[] @relation("ValidatedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, name, role, universityId])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id       String @id @default(cuid())
+  password String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken  String?
+  refreshToken String?
+
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, userId])
+  @@map("account")
+}
+
+model Media {
+  id        String    @id @default(cuid())
+  mimeType  String
+  size      Int
+  mediaType MediaType
+  url       String
+  key       String
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([id, mediaType])
+  @@map("media")
+}
+
+model Block {
+  id   String @id @default(cuid())
+  name String @unique
+
+  locationId String?   @unique
+  location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  dorms Dormitory[]
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, name])
+  @@map("block")
+}
+
+model Dormitory {
+  id     String     @id @default(cuid())
+  number Int
+  status DormStatus @default(FREE)
+
+  blockId String
+  block   Block  @relation(fields: [blockId], references: [id])
+
+  users UserDormitory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, number, blockId])
+  @@map("dormitory")
+}
+
+model UserDormitory {
+  id       String  @id @default(cuid())
+  isActive Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  dormId     String
+  dorm       Dormitory @relation(fields: [dormId], references: [id], onDelete: Cascade)
+  vaildUntil DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive, dormId])
+  @@map("user_dormitory")
+}
+
+model Gate {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  status     GateStatus @default(ONLINE)
+  locationId String?    @unique
+  location   Location?  @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@map("gate")
+}
+
+model Location {
+  id          String  @id @default(cuid())
+  coordinates String?
+  description String?
+
+  gate  Gate?
+  block Block?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("location")
+}
+
+model Laptop {
+  id           String @id @default(cuid())
+  serialNumber String
+  model        String
+  manufacturer String
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  exit LaptopExit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([serialNumber])
+  @@map("laptop")
+}
+
+model Property {
+  id          String @id @default(cuid())
+  name        String
+  description String
+
+  exits ExitProperty[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("property")
+}
+
+model Exit {
+  id            String     @id @default(cuid())
+  currentStatus ExitStatus @default(REQUESTED)
+  exitCode      String     @unique
+
+  properties ExitProperty[]
+
+  laptops LaptopExit[]
+
+  studentId  String
+  proctorId  String?
+  gateUserId String?
+
+  student  User  @relation("Student", fields: [studentId], references: [id])
+  proctor  User? @relation("ApprovedBy", fields: [proctorId], references: [id])
+  gateUser User? @relation("ValidatedBy", fields: [gateUserId], references: [id])
+
+  exitEvents ExitEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, studentId, proctorId, gateUserId])
+  @@map("exit")
+}
+
+model ExitProperty {
+  exitId     String
+  propertyId String
+  quantity   Int
+
+  exit     Exit     @relation(fields: [exitId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@id([exitId, propertyId])
+  @@map("exit_property")
+}
+
+model LaptopExit {
+  laptopId String
+  exitId   String
+
+  exit   Exit   @relation(fields: [exitId], references: [id], onDelete: Cascade)
+  laptop Laptop @relation(fields: [laptopId], references: [id])
+
+  @@id([exitId, laptopId])
+  @@map("laptop_exit")
+}
+
+model ExitEvent {
+  id     String     @id @default(cuid())
+  status ExitStatus
+  note   String?
+  at     DateTime   @default(now())
+
+  exitId String
+  exit   Exit   @relation(fields: [exitId], references: [id], onDelete: Cascade)
+
+  @@index([status, at, exitId])
+  @@map("exit_event")
+}
+
+enum Role {
+  STUDENT
+  PROCTOR
+  ADMIN
+  GATE
+}
+
+enum MediaType {
+  PROFILE
+  IMAGE
+  VIDEO
+}
+
+enum ExitStatus {
+  REQUESTED
+  APPROVED
+  DENIED
+  EXITED
+}
+
+enum GateStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+  MAINTENANCE
+}
+
+enum DormStatus {
+  FREE
+  OCCUPIED
+  UNUSABLE
+  MAINTENANCE
+}

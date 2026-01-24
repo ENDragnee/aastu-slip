@@ -1,0 +1,39 @@
+name: aastu_slip_managment_system
+
+services:
+  postgres:
+    image: postgres:18.1
+    container_name: aastu_slip_managment_system_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aastu_sms_admin
+      POSTGRES_PASSWORD: qazwsxedc
+      POSTGRES_DB: aastu_slip
+    ports:
+      - "5432:5432"
+    volumes:
+      - aastu_slip_managment_system_vol:/var/lib/postgresql
+    networks:
+      - aastu_slip_managment_system_network
+
+  nextjs_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ascii_foods
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    ports:
+      - "3000:3000"
+    networks:
+      - aastu_slip_managment_system_network
+    depends_on:
+      - postgres
+
+volumes:
+  aastu_slip_managment_system_vol:
+
+networks:
+  aastu_slip_managment_system_network:
+    driver: bridge

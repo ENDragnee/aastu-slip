@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Head from "next/head"; // Import Head from next/head
-import SidebarWrapper from "@/components/sideBarWarp";
-
+import Providers from "@/components/providers";
+import AppShell from "@/components/layout/app-shell";
+import { getApiSession } from "@/lib/server-auth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,21 +22,23 @@ export const metadata: Metadata = {
   icons: "/favicon.ico"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getApiSession();
   return (
-    <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <div className="pb-16">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>
+          <AppShell session={session}>
             {children}
-            <SidebarWrapper/>
-          </div>
-        </body>
+          </AppShell>
+        </Providers>
+      </body>
     </html>
   );
 }
