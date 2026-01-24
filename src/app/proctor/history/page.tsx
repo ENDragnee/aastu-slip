@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DateRange } from "react-day-picker"; // ✅ Import DateRange
 
 // Import Components
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -21,7 +22,9 @@ export default function ProctorHistoryPage() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("createdAt");
   const [search, setSearch] = useState("");
-  const [date, setDate] = useState<{ from: Date | undefined; to: Date | undefined }>({
+
+  // ✅ FIX: Use DateRange type for compatibility with HistoryToolbar
+  const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
@@ -36,13 +39,14 @@ export default function ProctorHistoryPage() {
     error,
     refetch
   } = useQuery({
-    queryKey: ["proctorHistory", page, limit, sort, date.from, date.to, search],
+    // ✅ FIX: Safe access for query key
+    queryKey: ["proctorHistory", page, limit, sort, date?.from, date?.to, search],
     queryFn: () => fetchProctorHistory({
       page,
       limit,
       sort,
-      from: date.from,
-      to: date.to,
+      from: date?.from, // ✅ FIX: Optional chaining
+      to: date?.to,     // ✅ FIX: Optional chaining
       search
     }),
     placeholderData: (previousData) => previousData,
@@ -60,13 +64,14 @@ export default function ProctorHistoryPage() {
     setPage(1);
   };
 
-  const handleDateChange = (range: { from: Date | undefined; to: Date | undefined } | undefined) => {
-    setDate({ from: range?.from, to: range?.to });
+  // ✅ FIX: Updated type signature to match HistoryToolbar
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDate(range);
     setPage(1);
   };
 
   const clearFilters = () => {
-    setDate({ from: undefined, to: undefined });
+    setDate(undefined); // ✅ FIX: Reset to undefined or clean object
     setSort("createdAt");
     setSearch("");
     setPage(1);
