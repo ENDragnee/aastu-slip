@@ -29,12 +29,44 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+    const searchParam = searchParams.get("search");
+
+    const fromDate = fromParam ? new Date(fromParam) : undefined;
+    if (fromDate && isNaN(fromDate.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid 'from' date" },
+        { status: 400 },
+      );
+    }
+
+    const toDate = toParam ? new Date(toParam) : undefined;
+    if (toDate && isNaN(toDate.getTime())) {
+      return NextResponse.json({ error: "Invalid 'to' date" }, { status: 400 });
+    }
 
     const offset = (page - 1) * limit;
 
     const histories = await prisma.exit.findMany({
       where: {
         proctorId: session.user.id,
+        createdAt: {
+          ...(fromDate && { gte: fromDate }),
+          ...(toDate && { lte: toDate }),
+        },
+        ...(searchParam && {
+          student: {
+            universityId: {
+              contains: searchParam,
+              mode: "insensitive",
+            },
+          },
+        }),
+      },
+
+      include: {
+        student: true,
       },
 
       take: limit,
