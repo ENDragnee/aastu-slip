@@ -45,3 +45,24 @@ export interface ExitRequestData {
   properties: PropertyItem[];
   laptops: LaptopItem[];
 }
+
+export interface HistoryRecord {
+  id: string;
+  currentStatus: ExitStatus;
+  exitCode: string;
+  studentId: string;
+  proctorId: string;
+  gateUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  student: Omit<StudentInfo, "dorm">;
+}
+
+export interface HistoryFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  from?: Date;
+  to?: Date;
+  search?: string;
+}
