@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
 import { Role } from "@/generated/prisma/enums";
+import { RouteParam } from "@/types";
 
-interface RouteParams {
-  params: Promise<{
-    userId: string;
-  }>;
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
-    // Early return - no session
     if (!session?.user) {
       return NextResponse.json(
         { error: "You must be logged in to access this resource" },
@@ -21,9 +15,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { userId } = await params;
+    const { id: userId } = await params;
 
-    // Authorization check
     if (userId !== session.user.id && session.user.role !== Role.ADMIN) {
       console.log(session.user.id);
       return NextResponse.json(
@@ -42,7 +35,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Failed to fetch laptops:", error);
 
-    // In development you can send more info, in production maybe just generic message
     const errorMessage =
       process.env.NODE_ENV === "development"
         ? (error as Error).message
