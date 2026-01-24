@@ -56,7 +56,10 @@ export async function GET(request: NextRequest, { params }: RouteParam) {
       where: {
         currentStatus: "REQUESTED",
         student: {
-          universityId: universityId,
+          universityId: {
+            contains: universityId,
+            mode: "insensitive",
+          },
           dorms: {
             some: {
               isActive: true,
