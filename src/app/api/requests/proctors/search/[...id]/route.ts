@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
 import { Role } from "@/generated/prisma/enums";
-import { RouteParam } from "@/types";
+
+interface RouteParam {
+  params: Promise<{
+    id: string[];
+  }>;
+}
 
 export async function GET(request: NextRequest, { params }: RouteParam) {
   try {
@@ -26,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParam) {
 
     const { searchParams } = request.nextUrl;
     const { id } = await params;
-    const universityId = id.toUpperCase();
+    const universityId = id.join("/").toLowerCase();
 
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
