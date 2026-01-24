@@ -29,6 +29,21 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
+    const searchParam = searchParams.get("search");
+
+    let orderBy: any = {};
+
+    if (sort === "status") {
+      orderBy = { status: order };
+    } else if (sort === "createdAt" || sort === "at") {
+      orderBy = { at: order };
+    } else {
+      orderBy = {
+        exit: {
+          [sort]: order,
+        },
+      };
+    }
 
     const offset = (page - 1) * limit;
 
@@ -36,19 +51,27 @@ export async function GET(request: NextRequest) {
       where: {
         exit: {
           proctorId: session.user.id,
+          ...(searchParam && {
+            student: {
+              universityId: {
+                contains: searchParam,
+                mode: "insensitive",
+              },
+            },
+          }),
         },
       },
       include: {
-        exit: true,
+        exit: {
+          include: {
+            student: true,
+          },
+        },
       },
 
       take: limit,
       skip: offset,
-      orderBy: {
-        exit: {
-          [sort]: order,
-        },
-      },
+      orderBy: orderBy,
     });
 
     return NextResponse.json(histories, { status: 200 });

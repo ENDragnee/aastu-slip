@@ -66,3 +66,28 @@ export interface HistoryFetchParams {
   to?: Date;
   search?: string;
 }
+
+export interface EventRecord {
+  id: string;
+  status: ExitStatus;
+  note: string | null;
+  at: string; // ISO Date string
+  exitId: string;
+  exit: {
+    id: string;
+    currentStatus: ExitStatus;
+    exitCode: string;
+    student: {
+      id: string;
+      name: string;
+      universityId: string;
+    };
+  };
+}
+
+export interface EventsFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string;
+}

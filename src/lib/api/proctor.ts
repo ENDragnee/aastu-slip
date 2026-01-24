@@ -1,5 +1,10 @@
 import axios from "axios";
-import { HistoryRecord, HistoryFetchParams } from "@/types/proctor";
+import {
+  HistoryRecord,
+  HistoryFetchParams,
+  EventRecord,
+  EventsFetchParams,
+} from "@/types/proctor";
 
 export const fetchProctorHistory = async ({
   page,
@@ -21,5 +26,24 @@ export const fetchProctorHistory = async ({
   if (search) params.search = search;
 
   const res = await axios.get("/api/histories/proctors", { params });
+  return res.data;
+};
+
+export const fetchProctorEvents = async ({
+  page,
+  limit,
+  sort,
+  search,
+}: EventsFetchParams): Promise<EventRecord[]> => {
+  const params: any = {
+    page,
+    limit,
+    sort,
+    order: "desc",
+  };
+
+  if (search) params.search = search;
+
+  const res = await axios.get("/api/histories/proctors/events", { params });
   return res.data;
 };
