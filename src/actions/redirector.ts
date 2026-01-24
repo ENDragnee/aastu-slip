@@ -15,6 +15,6 @@ export async function redirector() {
   } else if (session?.user?.role === Role.ADMIN) {
     redirect("/admin/dashboard");
   } else if (session?.user?.role === Role.GATE) {
-    redirect("/gate/dashboard");
+    redirect("/gateway");
   }
 }
