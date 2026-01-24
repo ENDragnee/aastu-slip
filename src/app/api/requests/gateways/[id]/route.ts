@@ -84,10 +84,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
     const { exitStatus, note } = await body;
     const approvedStatus = exitStatus as ExitStatus;
 
+    const exit = await prisma.exit.findUnique({ where: { exitCode } });
+
+    if (!exit) {
+      return NextResponse.json({ error: "Invalid exit code" }, { status: 404 });
+    }
+
+    if (exit.currentStatus !== ExitStatus.APPROVED) {
+      return NextResponse.json(
+        { error: "Exit not approved yet" },
+        { status: 400 },
+      );
+    }
+
     const exited = await prisma.exit.update({
       where: {
         exitCode: exitCode,
-        currentStatus: approvedStatus,
       },
 
       data: {
@@ -106,16 +118,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
       },
     });
 
-    if (!exited) {
-      return NextResponse.json(
-        { message: "The code is invalid" },
-        { status: 400 },
-      );
-    }
-
     return NextResponse.json({ exited }, { status: 200 });
   } catch (err) {
     console.error("Unexpected error: ", err);
+
+    if (
+      err instanceof Error &&
+      "code" in err &&
+      (err as any).code === "P2025"
+    ) {
+      return NextResponse.json(
+        { error: "Exit code not found" },
+        { status: 404 },
+      );
+    }
+
     return NextResponse.json(
       { error: "Unexpected error", err },
       { status: 500 },
