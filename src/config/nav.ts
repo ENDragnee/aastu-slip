@@ -2,12 +2,11 @@ import {
   Home,
   LayoutDashboard,
   History,
-  Calendar,
   Laptop2,
   CheckCircle,
-  Settings,
-  LogOut,
   FileText,
+  MessageSquare,
+  Info,
 } from "lucide-react";
 import { Role } from "@/generated/prisma/enums";
 
@@ -24,11 +23,27 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/",
     icon: Home,
   },
+  {
+    title: "About us",
+    href: "/about-us",
+    icon: Info,
+  },
+  {
+    title: "Contact us",
+    href: "/conact-us",
+    icon: MessageSquare,
+  },
   // --- Student Routes ---
   {
     title: "Request Exit",
     href: "/dashboard",
     icon: LayoutDashboard,
+    roles: [Role.STUDENT],
+  },
+  {
+    title: "Request History",
+    href: "/requests",
+    icon: History,
     roles: [Role.STUDENT],
   },
   // --- Proctor Routes ---
