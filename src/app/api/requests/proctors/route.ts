@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         [sort]: order,
       },
     });
-    return NextResponse.json(userRequests, { status: 201 });
+    return NextResponse.json(userRequests, { status: 200 });
   } catch (err) {
     return NextResponse.json(
       { error: "Unexpected error: ", err },
