@@ -35,6 +35,8 @@ export async function GET(request: NextRequest, { params }: RouteParam) {
 
       include: {
         student: true,
+        properties: true,
+        laptops: true,
       },
 
       orderBy: {
