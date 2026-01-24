@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import SidebarWrapper from "@/components/sideBarWarp";
 import Providers from "@/components/providers";
-import Footer from "@/components/footer";
-
+import AppShell from "@/components/layout/app-shell";
+import { getApiSession } from "@/lib/server-auth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,18 +22,21 @@ export const metadata: Metadata = {
   icons: "/favicon.ico"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getApiSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <AppShell session={session}>
+            {children}
+          </AppShell>
         </Providers>
       </body>
     </html>
