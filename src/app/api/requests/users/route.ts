@@ -19,24 +19,51 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
+    const searchParam = searchParams.get("search");
 
     const offset = (page - 1) * limit;
+
+    let orderBy: any = {};
+
+    if (sort === "status") {
+      orderBy = { currentStatus: order };
+    } else {
+      orderBy = { [sort]: order };
+    }
 
     const userRequests = await prisma.exit.findMany({
       where: {
         studentId: session.user.id,
+        ...(searchParam && {
+          exitCode: {
+            contains: searchParam,
+            mode: "insensitive",
+          },
+        }),
+      },
+
+      include: {
+        laptops: {
+          include: {
+            laptop: true,
+          },
+        },
+
+        properties: {
+          include: {
+            property: true,
+          },
+        },
+
+        student: true,
       },
       take: limit,
       skip: offset,
-      orderBy: {
-        [sort]: order,
-      },
+      orderBy: orderBy,
     });
-    return NextResponse.json(userRequests, { status: 201 });
+    return NextResponse.json(userRequests, { status: 200 });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Unexpected error: ", err },
-      { status: 500 },
-    );
+    console.error("Error fetching requests:", err);
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }
