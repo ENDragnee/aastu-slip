@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, locationId } = {
       ...body,
-      name: body.name.toUpper(),
+      name: body.name.toUpperCase(),
     };
 
     if (!name) {

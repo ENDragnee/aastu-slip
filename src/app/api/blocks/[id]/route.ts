@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
 
     const { name, locationId } = {
       ...body,
-      name: body.name.toUpper,
+      name: body.name.toUpperCase(),
     };
 
     const updateBlock = await prisma.block.update({
