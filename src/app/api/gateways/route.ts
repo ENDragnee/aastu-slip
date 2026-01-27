@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
-import { Role, DormStatus } from "@/generated/prisma/enums";
-import { RouteParam } from "@/types";
+import { Role, GateStatus } from "@/generated/prisma/enums";
 
-export async function DELETE({ params }: RouteParam) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getApiSession();
 
@@ -21,29 +20,47 @@ export async function DELETE({ params }: RouteParam) {
       );
     }
 
-    const { id: dormId } = await params;
+    const { searchParams } = request.nextUrl;
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const page = parseInt(searchParams.get("page") || "1");
+    const sort = searchParams.get("sort") || "createdAt";
+    const order = searchParams.get("order") || "desc";
+    const search = searchParams.get("search");
 
-    if (!dormId) {
-      return NextResponse.json(
-        { error: "Enter the required fields" },
-        { status: 400 },
-      );
-    }
+    const offset = (page - 1) * limit;
 
-    const deleteDorm = await prisma.dormitory.delete({
+    const gates = await prisma.gate.findMany({
       where: {
-        id: dormId,
+        ...(search && {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        }),
+      },
+
+      include: {
+        location: true,
+      },
+
+      take: limit,
+      skip: offset,
+      orderBy: {
+        [sort]: order,
       },
     });
 
-    return NextResponse.json(deleteDorm, { status: 204 });
+    return NextResponse.json(gates, { status: 200 });
   } catch (err) {
     console.error("Unexpected error: ", err);
-    return NextResponse.json({ error: "Unexpected error: " }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unexpected error: ", err },
+      { status: 500 },
+    );
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteParam) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getApiSession();
 
@@ -61,34 +78,28 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
     }
 
     const body = await request.json();
-    const { id: dormId } = await params;
-
-    const { number, status, blockId } = {
+    const { name, status, locationId } = {
       ...body,
-      number: parseInt(body?.number),
-      status: body.status as DormStatus,
+      name: body?.number.toUpperCase(),
+      status: body.status as GateStatus,
     };
 
-    if (!number && !blockId && !status) {
+    if (!name) {
       return NextResponse.json(
         { error: "Enter the required fields" },
         { status: 400 },
       );
     }
 
-    const updateDorm = await prisma.dormitory.update({
-      where: {
-        id: dormId,
-      },
-
+    const createGate = await prisma.gate.create({
       data: {
-        ...(number && { number: number }),
-        ...(blockId && { blockId: blockId }),
+        name: name,
+        locationId: locationId,
         ...(status && { status: status }),
       },
     });
 
-    return NextResponse.json(updateDorm, { status: 200 });
+    return NextResponse.json(createGate, { status: 201 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json(

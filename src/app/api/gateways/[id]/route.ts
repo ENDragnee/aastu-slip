@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
-import { Role, DormStatus } from "@/generated/prisma/enums";
+import { Role, GateStatus } from "@/generated/prisma/enums";
 import { RouteParam } from "@/types";
 
 export async function DELETE({ params }: RouteParam) {
@@ -21,22 +21,22 @@ export async function DELETE({ params }: RouteParam) {
       );
     }
 
-    const { id: dormId } = await params;
+    const { id: gateId } = await params;
 
-    if (!dormId) {
+    if (!gateId) {
       return NextResponse.json(
         { error: "Enter the required fields" },
         { status: 400 },
       );
     }
 
-    const deleteDorm = await prisma.dormitory.delete({
+    const deleteGate = await prisma.gate.delete({
       where: {
-        id: dormId,
+        id: gateId,
       },
     });
 
-    return NextResponse.json(deleteDorm, { status: 204 });
+    return NextResponse.json(deleteGate, { status: 204 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json({ error: "Unexpected error: " }, { status: 500 });
@@ -61,34 +61,34 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
     }
 
     const body = await request.json();
-    const { id: dormId } = await params;
+    const { id: gateId } = await params;
 
-    const { number, status, blockId } = {
+    const { name, status, locationId } = {
       ...body,
-      number: parseInt(body?.number),
-      status: body.status as DormStatus,
+      name: body?.number.toUpperCase(),
+      status: body.status as GateStatus,
     };
 
-    if (!number && !blockId && !status) {
+    if (!name && !locationId && !status) {
       return NextResponse.json(
         { error: "Enter the required fields" },
         { status: 400 },
       );
     }
 
-    const updateDorm = await prisma.dormitory.update({
+    const updateGate = await prisma.gate.update({
       where: {
-        id: dormId,
+        id: gateId,
       },
 
       data: {
-        ...(number && { number: number }),
-        ...(blockId && { blockId: blockId }),
+        ...(name && { name: name }),
+        ...(locationId && { locationId: locationId }),
         ...(status && { status: status }),
       },
     });
 
-    return NextResponse.json(updateDorm, { status: 200 });
+    return NextResponse.json(updateGate, { status: 200 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json(
