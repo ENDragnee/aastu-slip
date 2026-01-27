@@ -77,8 +77,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
       },
 
       data: {
-        name: name,
-        locationId: locationId,
+        ...(name && { name: name }),
+        ...(locationId && { locationId: locationId }),
       },
     });
 

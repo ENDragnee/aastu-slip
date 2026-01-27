@@ -77,8 +77,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
       },
 
       data: {
-        coordinates: coordinates,
-        description: description,
+        ...(coordinates && { coordinates: coordinates }),
+        ...(description && { description: description }),
       },
     });
 
