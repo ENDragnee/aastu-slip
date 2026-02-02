@@ -84,15 +84,17 @@ async function processBatchOptimized(rows: UserDormitoryInput[]) {
   const blockNames = [...new Set(rows.map((r) => r.block))];
 
   const users = await prisma.user.findMany({
-    where: { universityId: { in: universityIds } },
+    where: { universityId: { in: universityIds, mode: "insensitive" } },
     select: { id: true, universityId: true },
   });
 
-  const userMap = new Map(users.map((u) => [u.universityId, u.id]));
+  const userMap = new Map(
+    users.map((u) => [u.universityId.toLowerCase(), u.id]),
+  );
 
   const dorms = await prisma.dormitory.findMany({
     where: {
-      block: { name: { in: blockNames } },
+      block: { name: { in: blockNames, mode: "insensitive" } },
     },
     include: { block: true },
   });
@@ -106,7 +108,7 @@ async function processBatchOptimized(rows: UserDormitoryInput[]) {
   const validDormIds = [];
 
   for (const row of rows) {
-    const userId = userMap.get(row.studentId);
+    const userId = userMap.get(row.studentId.toLowerCase());
     if (!userId) {
       errors.push(`User not found: ${row.studentId}`);
       continue;
