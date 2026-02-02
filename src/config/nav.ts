@@ -30,7 +30,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Contact us",
-    href: "/conact-us",
+    href: "/contact-us",
     icon: MessageSquare,
   },
   // --- Student Routes ---
