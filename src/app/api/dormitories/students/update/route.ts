@@ -10,7 +10,10 @@ const UserDormitorySchema = z.object({
   studentId: z.string().trim(),
   block: z.string().trim(),
   dormNumber: z.coerce.number(),
-  validUntil: z.coerce.date().optional(),
+  validUntil: z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.coerce.date().optional(),
+  ),
 });
 
 type UserDormitoryInput = z.infer<typeof UserDormitorySchema>;
