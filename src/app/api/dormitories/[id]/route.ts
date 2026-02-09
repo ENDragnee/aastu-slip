@@ -4,7 +4,7 @@ import { getApiSession } from "@/lib/server-auth";
 import { Role, DormStatus } from "@/generated/prisma/enums";
 import { RouteParam } from "@/types";
 
-export async function DELETE({ params }: RouteParam) {
+export async function DELETE(request: NextResponse, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
@@ -30,13 +30,13 @@ export async function DELETE({ params }: RouteParam) {
       );
     }
 
-    const deleteDorm = await prisma.dormitory.delete({
+    await prisma.dormitory.delete({
       where: {
         id: dormId,
       },
     });
 
-    return NextResponse.json(deleteDorm, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json({ error: "Unexpected error: " }, { status: 500 });
@@ -65,8 +65,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
 
     const { number, status, blockId } = {
       ...body,
-      number: parseInt(body?.number),
-      status: body.status as DormStatus,
+      ...(body.number && { number: parseInt(body?.number) }),
+      ...(body.status && { status: body.status.toUpperCase() as DormStatus }),
     };
 
     if (!number && !blockId && !status) {
