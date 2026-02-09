@@ -4,7 +4,7 @@ import { getApiSession } from "@/lib/server-auth";
 import { Role, GateStatus } from "@/generated/prisma/enums";
 import { RouteParam } from "@/types";
 
-export async function DELETE({ params }: RouteParam) {
+export async function DELETE(request: NextRequest, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
@@ -30,13 +30,13 @@ export async function DELETE({ params }: RouteParam) {
       );
     }
 
-    const deleteGate = await prisma.gate.delete({
+    await prisma.gate.delete({
       where: {
         id: gateId,
       },
     });
 
-    return NextResponse.json(deleteGate, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json({ error: "Unexpected error: " }, { status: 500 });
@@ -65,8 +65,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
 
     const { name, status, locationId } = {
       ...body,
-      name: body?.number.toUpperCase(),
-      status: body.status as GateStatus,
+      ...(body.name && { name: body.name.toUpperCase() }),
+      ...(body.status && { status: body.status.toUpperCase() as GateStatus }),
     };
 
     if (!name && !locationId && !status) {
