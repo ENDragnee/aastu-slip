@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
-    const search  = searchParams.get("search")
+    const search = searchParams.get("search");
 
-    const offset = ( page - 1 ) * limit;
+    const offset = (page - 1) * limit;
 
     const dorms = await prisma.dormitory.findMany({
       where: {
@@ -35,21 +35,21 @@ export async function GET(request: NextRequest) {
           block: {
             name: {
               contains: search,
-              mode: "insensitive"
-            }
-          }
-        })
+              mode: "insensitive",
+            },
+          },
+        }),
       },
 
       include: {
-        block: true
+        block: true,
       },
 
       take: limit,
       skip: offset,
       orderBy: {
-        [sort]: order
-      }
+        [sort]: order,
+      },
     });
 
     return NextResponse.json(dorms, { status: 200 });
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const { number, status, blockId } = {
       ...body,
       number: parseInt(body?.number),
-      status: body.status as DormStatus,
+      status: body.status.toUpperCase() as DormStatus,
     };
 
     if (!number || !blockId) {
