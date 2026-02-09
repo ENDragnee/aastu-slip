@@ -33,10 +33,26 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
+    const search = searchParams.get("search");
 
     const offset = (page - 1) * limit;
 
     const userRequests = await prisma.exit.findMany({
+      where: {
+        ...(search && {
+          student: {
+            universityId: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        }),
+      },
+      include: {
+        properties: true,
+        laptops: true,
+        student: true,
+      },
       take: limit,
       skip: offset,
       orderBy: {
