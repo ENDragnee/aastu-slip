@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, status, locationId } = {
       ...body,
-      name: body?.number.toUpperCase(),
-      status: body.status as GateStatus,
+      name: body.name.toUpperCase(),
+      status: body.status.toUpperCase() as GateStatus,
     };
 
     if (!name) {
