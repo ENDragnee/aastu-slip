@@ -4,7 +4,7 @@ import { Role } from "@/generated/prisma/enums";
 import { getApiSession } from "@/lib/server-auth";
 import { RouteParam } from "@/types";
 
-export async function DELETE({ params }: RouteParam) {
+export async function DELETE(request: NextRequest, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
@@ -30,13 +30,13 @@ export async function DELETE({ params }: RouteParam) {
       );
     }
 
-    const deleteBlock = await prisma.block.delete({
+    await prisma.block.delete({
       where: {
         id: blockId,
       },
     });
 
-    return NextResponse.json(deleteBlock, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json(
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
 
     const { name, locationId } = {
       ...body,
-      name: body.name.toUpperCase(),
+      ...(body.name && { name: body.name.toUpperCase() }),
     };
 
     const updateBlock = await prisma.block.update({
