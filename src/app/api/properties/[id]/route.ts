@@ -4,7 +4,7 @@ import { getApiSession } from "@/lib/server-auth";
 import { Role } from "@/generated/prisma/enums";
 import { RouteParam } from "@/types";
 
-export async function DELETE({ params }: RouteParam) {
+export async function DELETE(request: NextResponse, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
@@ -23,13 +23,13 @@ export async function DELETE({ params }: RouteParam) {
 
     const { id: propertyId } = await params;
 
-    const deleteProperty = await prisma.property.delete({
+    await prisma.property.delete({
       where: {
         id: propertyId,
       },
     });
 
-    return NextResponse.json(deleteProperty, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("Unexpected error: ", err);
     return NextResponse.json(
@@ -61,8 +61,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParam) {
 
     const { name, description } = {
       ...body,
-      name: body.name?.toLowerCase(),
-      description: body.description?.toLowerCase(),
+      ...(body.name && { name: body.name?.toLowerCase() }),
+      ...(body.description && { description: body.description?.toLowerCase() }),
     };
 
     if (!name && !description) {
