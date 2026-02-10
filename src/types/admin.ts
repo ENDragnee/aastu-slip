@@ -113,3 +113,30 @@ export interface LocationFormData {
   coordinates: string;
   description: string;
 }
+
+export interface Gate {
+  id: string;
+  name: string;
+  status: GateStatus;
+  locationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  location?: {
+    id: string;
+    coordinates: string;
+    description: string;
+  };
+}
+
+export interface GateFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string;
+}
+
+export interface GateFormData {
+  name: string;
+  status: GateStatus;
+  locationId: string;
+}
