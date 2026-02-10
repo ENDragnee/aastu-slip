@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { getApiSession } from "@/lib/server-auth";
 
 export default async function ProctorLayout({
