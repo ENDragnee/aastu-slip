@@ -4,7 +4,7 @@ import { getApiSession } from "@/lib/server-auth";
 import { Role, DormStatus } from "@/generated/prisma/enums";
 import { RouteParam } from "@/types";
 
-export async function DELETE(request: NextResponse, { params }: RouteParam) {
+export async function DELETE(request: NextRequest, { params }: RouteParam) {
   try {
     const session = await getApiSession();
 
