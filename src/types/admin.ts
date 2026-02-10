@@ -47,3 +47,23 @@ export interface AdminRequestParams {
   from?: Date;
   to?: Date;
 }
+
+export interface Block {
+  id: string;
+  name: string;
+  locationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlockFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string;
+}
+
+export interface BlockFormData {
+  name: string;
+  locationId?: string;
+}
