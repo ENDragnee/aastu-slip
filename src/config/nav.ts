@@ -1,5 +1,4 @@
 import {
-  Home,
   LayoutDashboard,
   History,
   Laptop2,
@@ -7,6 +6,12 @@ import {
   FileText,
   MessageSquare,
   Info,
+  Bed,
+  Building,
+  MapPin,
+  DoorOpen,
+  Package,
+  UploadCloud,
 } from "lucide-react";
 import { Role } from "@/generated/prisma/enums";
 
@@ -18,21 +23,6 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  {
-    title: "Home",
-    href: "/",
-    icon: Home,
-  },
-  {
-    title: "About us",
-    href: "/about-us",
-    icon: Info,
-  },
-  {
-    title: "Contact us",
-    href: "/conact-us",
-    icon: MessageSquare,
-  },
   // --- Student Routes ---
   {
     title: "Request Exit",
@@ -51,31 +41,97 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Dashboard",
     href: "/proctor/dashboard",
     icon: LayoutDashboard,
-    roles: [Role.PROCTOR, Role.ADMIN],
+    roles: [Role.PROCTOR],
   },
   {
     title: "History",
     href: "/proctor/history",
     icon: FileText,
-    roles: [Role.PROCTOR, Role.ADMIN],
+    roles: [Role.PROCTOR],
   },
   {
     title: "Activity Log",
     href: "/proctor/events",
     icon: History,
-    roles: [Role.PROCTOR, Role.ADMIN],
+    roles: [Role.PROCTOR],
   },
+  {
+    title: "Admin Dashboard",
+    href: "/admin/dashboard",
+    icon: LayoutDashboard,
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "All Laptops",
+    href: "/admin/laptops",
+    icon: Laptop2,
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Blocks",
+    href: "/admin/blocks",
+    icon: Building, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Bulk Assignment",
+    href: "/admin/dorms/assignment",
+    icon: UploadCloud, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Dormitories",
+    href: "/admin/dorms",
+    icon: Bed, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Events",
+    href: "/admin/events",
+    icon: MessageSquare, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Gateways",
+    href: "/admin/gateways",
+    icon: DoorOpen, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Global Requests",
+    href: "/admin/requests",
+    icon: FileText,
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Locations",
+    href: "/admin/locations",
+    icon: MapPin, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Properties",
+    href: "/admin/properties",
+    icon: Package,
+    roles: [Role.ADMIN],
+  },
+
   // --- Gateway Routes ---
   {
     title: "Check Exit",
     href: "/gateway",
     icon: CheckCircle,
-    roles: [Role.GATE, Role.ADMIN],
+    roles: [Role.GATE],
   },
   {
     title: "Laptops",
     href: "/gateway/laptops",
     icon: Laptop2,
-    roles: [Role.GATE, Role.ADMIN],
+    roles: [Role.GATE],
+  },
+  {
+    title: "About us",
+    href: "/about-us",
+    icon: Info,
   },
 ];

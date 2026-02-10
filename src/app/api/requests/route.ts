@@ -29,26 +29,87 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = request.nextUrl;
 
+    // --- Pagination & Sorting ---
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const sort = searchParams.get("sort") || "createdAt";
     const order = searchParams.get("order") || "desc";
 
+    // --- Filters ---
+    const search = searchParams.get("search");
+    const statusParam = searchParams.get("status");
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+
+    // Validate Dates
+    const fromDate = fromParam ? new Date(fromParam) : undefined;
+    if (fromDate && isNaN(fromDate.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid 'from' date" },
+        { status: 400 },
+      );
+    }
+
+    const toDate = toParam ? new Date(toParam) : undefined;
+    if (toDate && isNaN(toDate.getTime())) {
+      return NextResponse.json({ error: "Invalid 'to' date" }, { status: 400 });
+    }
+
     const offset = (page - 1) * limit;
 
+    // Fix Sorting: Map 'status' -> 'currentStatus' if needed
+    let orderBy: any = {};
+    if (sort === "status") {
+      orderBy = { currentStatus: order };
+    } else {
+      orderBy = { [sort]: order };
+    }
+
     const userRequests = await prisma.exit.findMany({
+      where: {
+        // 1. Search Filter (Student ID)
+        ...(search && {
+          student: {
+            universityId: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        }),
+
+        // 2. Status Filter
+        ...(statusParam && {
+          currentStatus: statusParam as ExitStatus,
+        }),
+
+        // 3. Date Range Filter
+        createdAt: {
+          ...(fromDate && { gte: fromDate }),
+          ...(toDate && { lte: toDate }),
+        },
+      },
+      include: {
+        properties: {
+          include: {
+            property: true,
+          },
+        },
+        laptops: {
+          include: {
+            laptop: true,
+          },
+        },
+        student: true,
+      },
       take: limit,
       skip: offset,
-      orderBy: {
-        [sort]: order,
-      },
+      orderBy: orderBy,
     });
-    return NextResponse.json(userRequests, { status: 201 });
+
+    return NextResponse.json(userRequests, { status: 200 });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Unexpected error: ", err },
-      { status: 500 },
-    );
+    console.error("Error fetching requests:", err);
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }
 

@@ -1,20 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation"; // ✅ Import usePathname
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react"; // ✅ Import this
 import { Sidebar } from "./sidebar";
 import { Navbar } from "./navbar";
 import { Footer } from "./footer";
 import { cn } from "@/lib/utils";
 import { Role } from "@/generated/prisma/enums";
 
-interface AppShellProps {
-  children: React.ReactNode;
-  session: any;
-}
+export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  // ✅ Hook into the session context. This triggers re-renders on login/logout.
+  const { data: session } = useSession();
 
-export default function AppShell({ children, session }: AppShellProps) {
-  const pathname = usePathname(); // Get current route
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // 1. Define routes where the layout should be hidden
@@ -22,7 +21,7 @@ export default function AppShell({ children, session }: AppShellProps) {
     pathname === "/" ||
     pathname.startsWith("/auth");
 
-  // 2. Auto-collapse logic (Only run if not a public page)
+  // 2. Auto-collapse logic
   useEffect(() => {
     if (isPublicPage) return;
 
@@ -39,7 +38,7 @@ export default function AppShell({ children, session }: AppShellProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, [isPublicPage]);
 
-  // 3. Early Return for Public Pages (No Sidebar/Navbar)
+  // 3. Early Return for Public Pages
   if (isPublicPage) {
     return (
       <div className="min-h-screen bg-background text-foreground">
@@ -48,7 +47,6 @@ export default function AppShell({ children, session }: AppShellProps) {
     );
   }
 
-  // 4. Render Dashboard Layout
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
@@ -56,13 +54,13 @@ export default function AppShell({ children, session }: AppShellProps) {
       {/* Top Navigation */}
       <Navbar
         onMenuClick={toggleSidebar}
-        user={session?.user}
+        user={session?.user} // Pass the live user data
       />
 
       {/* Side Navigation */}
       <Sidebar
         isOpen={isSidebarOpen}
-        userRole={session?.user?.role as Role}
+        userRole={session?.user?.role as Role} // Pass the live role
       />
 
       {/* Main Content Area */}
