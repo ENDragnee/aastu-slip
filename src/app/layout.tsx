@@ -28,13 +28,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getApiSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <AppShell session={session}>
+        {/* Pass session to Providers to hydrate the client context */}
+        <Providers session={session}>
+          <AppShell>
             {children}
           </AppShell>
         </Providers>
