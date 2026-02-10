@@ -63,12 +63,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: [Role.ADMIN],
   },
   {
-    title: "Global Requests",
-    href: "/admin/requests",
-    icon: FileText,
-    roles: [Role.ADMIN],
-  },
-  {
     title: "All Laptops",
     href: "/admin/laptops",
     icon: Laptop2,
@@ -81,15 +75,15 @@ export const NAV_ITEMS: NavItem[] = [
     roles: [Role.ADMIN],
   },
   {
-    title: "Dormitories",
-    href: "/admin/dorms",
-    icon: Bed, // Import from lucide-react
+    title: "Bulk Assignment",
+    href: "/admin/dorms/assignment",
+    icon: UploadCloud, // Import from lucide-react
     roles: [Role.ADMIN],
   },
   {
-    title: "Locations",
-    href: "/admin/locations",
-    icon: MapPin, // Import from lucide-react
+    title: "Dormitories",
+    href: "/admin/dorms",
+    icon: Bed, // Import from lucide-react
     roles: [Role.ADMIN],
   },
   {
@@ -99,15 +93,21 @@ export const NAV_ITEMS: NavItem[] = [
     roles: [Role.ADMIN],
   },
   {
-    title: "Properties",
-    href: "/admin/properties",
-    icon: Package,
+    title: "Global Requests",
+    href: "/admin/requests",
+    icon: FileText,
     roles: [Role.ADMIN],
   },
   {
-    title: "Bulk Assignment",
-    href: "/admin/dorms/assignment",
-    icon: UploadCloud, // Import from lucide-react
+    title: "Locations",
+    href: "/admin/locations",
+    icon: MapPin, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Properties",
+    href: "/admin/properties",
+    icon: Package,
     roles: [Role.ADMIN],
   },
 
@@ -122,16 +122,11 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Laptops",
     href: "/gateway/laptops",
     icon: Laptop2,
-    roles: [Role.GATE, Role.ADMIN],
+    roles: [Role.GATE],
   },
   {
     title: "About us",
     href: "/about-us",
     icon: Info,
-  },
-  {
-    title: "Contact us",
-    href: "/contact-us",
-    icon: MessageSquare,
   },
 ];

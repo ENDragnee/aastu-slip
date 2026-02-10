@@ -168,3 +168,14 @@ export interface LaptopFormData {
   model: string;
   manufacturer: string;
 }
+
+export interface Property {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface PropertyFormData {
+  name: string;
+  description: string;
+}
