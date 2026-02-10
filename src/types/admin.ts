@@ -1,4 +1,4 @@
-import { GateStatus, ExitStatus } from "@/generated/prisma/enums";
+import { GateStatus, ExitStatus, DormStatus } from "@/generated/prisma/enums";
 
 export interface GateStat {
   id: string;
@@ -66,4 +66,30 @@ export interface BlockFetchParams {
 export interface BlockFormData {
   name: string;
   locationId?: string;
+}
+
+export interface Dorm {
+  id: string;
+  number: number;
+  status: DormStatus;
+  blockId: string;
+  createdAt: string;
+  updatedAt: string;
+  block: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface DormFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string; // Block name search
+}
+
+export interface DormFormData {
+  number: number;
+  status: DormStatus;
+  blockId: string;
 }
