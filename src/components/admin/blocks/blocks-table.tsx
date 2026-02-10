@@ -49,7 +49,7 @@ export function BlocksTable({ data, onEdit }: BlocksTableProps) {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead>Block Name</TableHead>
-              <TableHead>Location</TableHead>
+              <TableHead>Location ID</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -68,8 +68,9 @@ export function BlocksTable({ data, onEdit }: BlocksTableProps) {
                 </TableCell>
                 <TableCell>
                   {block.locationId ? (
-                    <Badge variant="outline" className="font-mono text-xs">
-                      <MapPin className="mr-1 h-3 w-3" /> {block.locationId.slice(0, 8)}...
+                    <Badge variant="outline" className="font-mono text-xs text-muted-foreground" title={block.locationId}>
+                      <MapPin className="mr-1 h-3 w-3" />
+                      {block.locationId.substring(0, 8)}...
                     </Badge>
                   ) : (
                     <span className="text-muted-foreground italic text-xs">Unassigned</span>
@@ -111,7 +112,7 @@ export function BlocksTable({ data, onEdit }: BlocksTableProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the block and may affect associated dorms.
+              This action cannot be undone. This will permanently delete the block.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

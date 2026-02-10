@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
@@ -10,14 +10,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { createBlock, updateBlock } from "@/lib/api/blocks";
+import { fetchLocations } from "@/lib/api/locations"; // ✅ Import location fetcher
 import { useToast } from "@/hooks/use-toast";
 import { Block, BlockFormData } from "@/types/admin";
 
 interface BlockFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData?: Block | null; // If present, we are editing
+  initialData?: Block | null;
 }
 
 export function BlockFormModal({ isOpen, onClose, initialData }: BlockFormModalProps) {
@@ -25,7 +29,13 @@ export function BlockFormModal({ isOpen, onClose, initialData }: BlockFormModalP
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Reset form when modal opens or initialData changes
+  // ✅ Fetch locations for the dropdown
+  const { data: locations, isLoading: isLoadingLocations } = useQuery({
+    queryKey: ["allLocations"],
+    queryFn: () => fetchLocations({ page: 1, limit: 100, sort: "description" }),
+    enabled: isOpen, // Only fetch when modal is open
+  });
+
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
@@ -85,14 +95,26 @@ export function BlockFormModal({ isOpen, onClose, initialData }: BlockFormModalP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="locationId">Location ID (Optional)</Label>
-            <Input
-              id="locationId"
-              placeholder="UUID of the location"
-              {...register("locationId")}
-            />
+            <Label htmlFor="locationId">Location</Label>
+            {/* ✅ Select Component for Location */}
+            <Select
+              onValueChange={(val) => setValue("locationId", val)}
+              defaultValue={initialData?.locationId || ""}
+            >
+              <SelectTrigger disabled={isLoadingLocations}>
+                <SelectValue placeholder={isLoadingLocations ? "Loading locations..." : "Select a Location"} />
+              </SelectTrigger>
+              <SelectContent>
+                {locations?.map((loc) => (
+                  <SelectItem key={loc.id} value={loc.id}>
+                    {loc.description} <span className="text-muted-foreground text-xs">({loc.coordinates})</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" {...register("locationId")} />
             <p className="text-[10px] text-muted-foreground">
-              Link this block to a physical location coordinates.
+              Link this block to physical coordinates (optional).
             </p>
           </div>
 
