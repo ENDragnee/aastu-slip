@@ -6,19 +6,19 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app /app
 COPY . .
 
 # ✅ Generate Prisma Client

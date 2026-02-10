@@ -17,13 +17,14 @@ services:
       - aastu_slip_managment_system_network
 
   nextjs_app:
+    image: mastwal/aastu-slip-app:1.1.0
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ascii_foods
+    container_name: aastu-slip-managment
     restart: unless-stopped
     env_file:
-      - .env.local
+      - .env
     ports:
       - "3000:3000"
     networks:
