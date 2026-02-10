@@ -117,9 +117,11 @@ async function processBatchOptimized(rows: UserDormitoryInput[]) {
       continue;
     }
 
-    const dormId = dormMap.get(`${row.block}:${row.dormNumber}`);
+    const dormId = dormMap.get(`${row.block.toUpperCase()}:${row.dormNumber}`);
     if (!dormId) {
-      errors.push(`Dorm not found: ${row.block}-${row.dormNumber}`);
+      errors.push(
+        `Dorm not found: ${row.block.toUpperCase()}-${row.dormNumber}`,
+      );
       continue;
     }
 

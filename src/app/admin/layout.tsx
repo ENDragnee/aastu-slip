@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { getApiSession } from "@/lib/server-auth";
 
 export default async function ProctorLayout({
   children
 }: {
   children: React.ReactNode
 }) {
-  const { data: session } = useSession();
+  const session = await getApiSession();
   const user = session?.user;
 
   if (!user || user.role !== "ADMIN") {
