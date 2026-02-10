@@ -93,3 +93,23 @@ export interface DormFormData {
   status: DormStatus;
   blockId: string;
 }
+
+export interface Location {
+  id: string;
+  coordinates: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LocationFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string; // Description search (implied by your API logic?)
+}
+
+export interface LocationFormData {
+  coordinates: string;
+  description: string;
+}
