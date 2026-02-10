@@ -1,5 +1,4 @@
 import {
-  Home,
   LayoutDashboard,
   History,
   Laptop2,
@@ -87,6 +86,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: [Role.ADMIN],
   },
   {
+    title: "Events",
+    href: "/admin/events",
+    icon: MessageSquare, // Import from lucide-react
+    roles: [Role.ADMIN],
+  },
+  {
     title: "Gateways",
     href: "/admin/gateways",
     icon: DoorOpen, // Import from lucide-react
@@ -116,7 +121,7 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Check Exit",
     href: "/gateway",
     icon: CheckCircle,
-    roles: [Role.GATE, Role.ADMIN],
+    roles: [Role.GATE],
   },
   {
     title: "Laptops",
