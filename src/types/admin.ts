@@ -140,3 +140,31 @@ export interface GateFormData {
   status: GateStatus;
   locationId: string;
 }
+
+export interface AdminLaptop {
+  id: string;
+  serialNumber: string;
+  model: string;
+  manufacturer: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    universityId: string;
+    email: string;
+  };
+}
+
+export interface LaptopFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string; // Student University ID search
+}
+
+export interface LaptopFormData {
+  universityId?: string; // Only needed for creation
+  serialNumber: string;
+  model: string;
+  manufacturer: string;
+}
