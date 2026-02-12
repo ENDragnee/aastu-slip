@@ -1,66 +1,63 @@
-FROM node:22-alpine AS base
+# --- BASE STAGE ---
+FROM node:25-alpine AS base
 
-# 1. Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# 1. Install system libs
+RUN apk add --no-cache openssl libc6-compat
+
+# 2. Install Corepack with --force to overwrite existing yarn/pnpm binaries
+# Then enable it to handle the packageManager field
+RUN npm install -g corepack@latest --force && corepack enable
+
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
-
+# --- BUILDER STAGE ---
+FROM base AS builder
+# Copy only lockfile and package.json for better caching
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
-RUN pnpm install --no-frozen-lockfile
+# Ensure the specific pnpm version from package.json is prepared and installed
+RUN corepack prepare --activate && pnpm install --no-frozen-lockfile
 
-# 2. Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
-
-COPY --from=deps /app /app
+# Copy ALL source files
 COPY . .
 
-# ✅ Generate Prisma Client
-# We need the engine here for the build process
+# Generate Prisma Client & Build
 RUN pnpm prisma generate
-
-# Build the project
 RUN pnpm build
 
-# 3. Production image, copy all the files and run next
+# --- RUNNER STAGE ---
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+# Create Non-root User
+RUN addgroup --system --gid 1001 nodejs && \
+  adduser --system --uid 1001 nextjs
 
-# ✅ Install OpenSSL (Required for Prisma on Alpine)
-RUN apk add --no-cache openssl
+COPY package.json pnpm-lock.yaml ./
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# 3. Use Corepack for Production Install
+# We need 'tsx' and 'prisma' for your custom config setup
+RUN corepack prepare --activate && \
+  pnpm install --prod --no-frozen-lockfile && \
+  pnpm add -D tsx dotenv prisma
 
-# Copy public folder
-COPY --from=builder /app/public ./public
-
-# Copy Prisma schema for migrations
-COPY --from=builder /app/prisma ./prisma
-
-# ✅ Copy the standalone build
+# Copy Next.js Build (Standalone)
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# ✅ Copy generated client (since you use a custom output path)
+# 4. Copy Prisma Assets & Config
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3000
 
-# ✅ FIX: 
-# 1. Use 'npx -y' because 'pnpm' is not installed in this stage.
-# 2. Use 'node server.js' because this is a standalone build.
-CMD ["sh", "-c", "npx -y prisma migrate deploy && node server.js"]
+# Next.js standalone server
+CMD ["sh", "-c", "pnpm prisma db push && node server.js"]

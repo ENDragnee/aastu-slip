@@ -24,7 +24,7 @@ services:
     container_name: aastu-slip-managment
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.docker
     ports:
       - "3000:3000"
     networks:
