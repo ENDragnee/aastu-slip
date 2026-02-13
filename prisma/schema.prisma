@@ -135,7 +135,7 @@ model UserDormitory {
 
   dormId     String
   dorm       Dormitory @relation(fields: [dormId], references: [id], onDelete: Cascade)
-  vaildUntil DateTime?
+  validUntil DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
