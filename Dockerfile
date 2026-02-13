@@ -21,6 +21,13 @@ RUN corepack prepare --activate && pnpm install --no-frozen-lockfile
 # Copy ALL source files
 COPY . .
 
+ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ARG NEXTAUTH_SECRET="dummy_secret_for_build_only"
+
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV NODE_ENV=production
+
 # Generate Prisma Client & Build
 RUN pnpm prisma generate
 RUN pnpm build
