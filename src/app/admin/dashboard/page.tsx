@@ -2,32 +2,21 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
-  Users, DoorOpen, LogOut, Building, Loader2
+  Users, DoorOpen, LogOut, Building, Loader2, AlertCircle,
+  History
 } from "lucide-react";
 import { StatCard } from "@/components/admin/dashboard/stat-card";
 import { GateStatusList } from "@/components/admin/dashboard/gate-status-list";
 import { OccupancyList } from "@/components/admin/dashboard/occupancy-list";
-import { fetchBlockStats, fetchGateStats, fetchRecentExits } from "@/lib/api/admin";
+import { fetchAdminDashboardGraphQL } from "@/lib/api/admin-graphql";
 import { GateStatus } from "@/generated/prisma/enums";
 
 export default function AdminDashboard() {
-  // Parallel Data Fetching
-  const { data: gates, isLoading: gatesLoading } = useQuery({
-    queryKey: ["adminGates"],
-    queryFn: fetchGateStats,
-  });
 
-  const { data: blocks, isLoading: blocksLoading } = useQuery({
-    queryKey: ["adminBlocks"],
-    queryFn: fetchBlockStats,
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["adminDashboardGraphQL"],
+    queryFn: fetchAdminDashboardGraphQL,
   });
-
-  const { data: exits, isLoading: exitsLoading } = useQuery({
-    queryKey: ["adminExits"],
-    queryFn: fetchRecentExits,
-  });
-
-  const isLoading = gatesLoading || blocksLoading || exitsLoading;
 
   if (isLoading) {
     return (
@@ -37,16 +26,25 @@ export default function AdminDashboard() {
     );
   }
 
-  // Calculate Metrics
-  const totalStudents = blocks?.reduce((acc, b) => acc + b.activeStudents, 0) || 0;
-  const activeGates = gates?.filter(g => g.status === GateStatus.ONLINE).length || 0;
-  const exitsToday = exits?.filter(e => {
-    const date = new Date(e.createdAt);
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
-  }).length || 0;
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-muted-foreground">
+        <AlertCircle className="h-10 w-10 mb-2" />
+        <p>Failed to load dashboard data.</p>
+        <p className="text-sm">{(error as Error)?.message}</p>
+      </div>
+    );
+  }
+
+  // Calculate totals
+  const totalStudents = data.blocks.reduce((acc, b) => acc + (b.activeStudent || 0), 0);
+  const activeGates = data.gateways.filter(g => g.status === GateStatus.ONLINE).length;
+
+  // Map 'blocks' to match OccupancyList prop name (activeStudent -> activeStudents)
+  const mappedBlocks = data.blocks.map(b => ({
+    ...b,
+    activeStudents: b.activeStudent
+  }));
 
   return (
     <div className="space-y-6">
@@ -63,20 +61,26 @@ export default function AdminDashboard() {
           icon={Users}
         />
         <StatCard
+          title="Total Exits"
+          value={data.requests.total}
+          description="All time processed exits"
+          icon={History}
+        />
+        <StatCard
           title="Exits Today"
-          value={exitsToday}
+          value={data.requests.today}
           description="Requests created today"
           icon={LogOut}
         />
         <StatCard
           title="Active Gates"
           value={activeGates}
-          description={`${gates?.length || 0} total gates configured`}
+          description={`${data.gateways.length} total gates configured`}
           icon={DoorOpen}
         />
         <StatCard
           title="Housing Blocks"
-          value={blocks?.length || 0}
+          value={data.blocks.length}
           description="Managed residential blocks"
           icon={Building}
         />
@@ -84,8 +88,8 @@ export default function AdminDashboard() {
 
       {/* --- Detailed Widgets Row --- */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <OccupancyList blocks={blocks || []} />
-        <GateStatusList gates={gates || []} />
+        <OccupancyList blocks={mappedBlocks} />
+        <GateStatusList gates={data.gateways} />
       </div>
     </div>
   );
