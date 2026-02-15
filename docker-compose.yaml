@@ -17,7 +17,7 @@ services:
       - aastu_slip_managment_system_network
 
   nextjs_app:
-    image: mastwal/aastu-slip-app:1.1.1
+    image: mastwal/aastu-slip-app:1.1.2
     build:
       context: .
       dockerfile: Dockerfile
