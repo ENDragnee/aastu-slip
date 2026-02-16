@@ -173,7 +173,7 @@ model Location {
 
 model Laptop {
   id           String @id @default(cuid())
-  serialNumber String
+  serialNumber String @unique
   model        String
   manufacturer String
 
