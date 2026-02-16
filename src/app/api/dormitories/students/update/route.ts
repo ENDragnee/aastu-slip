@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getApiSession } from "@/lib/server-auth";
 import { Role } from "@/generated/prisma/enums";
-import { parse } from "csv-parse";
+import { parse, NODE_STREAM_INPUT } from "papaparse";
 import { z } from "zod";
 import { Readable } from "stream";
 
@@ -31,35 +31,50 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
-    const stream = Readable.from(Buffer.from(await file.arrayBuffer()));
-    const parser = stream.pipe(
-      parse({ columns: true, trim: true, skip_empty_lines: true }),
-    );
-
     let batch: UserDormitoryInput[] = [];
     let processedCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
 
-    for await (const row of parser) {
-      const parsed = UserDormitorySchema.safeParse(row);
+    const nodeStream = Readable.fromWeb(file.stream() as any);
 
-      if (!parsed.success) {
-        errors.push(`Row format error: ${JSON.stringify(row)}`);
-        errorCount++;
-        continue;
-      }
+    await new Promise<void>((resolve, reject) => {
+      const papaStream = parse(NODE_STREAM_INPUT, {
+        header: true,
+        skipEmptyLines: "greedy",
+        transform: (value) => value.trim(),
+        transformHeader: (header) => header.trim(),
+      });
 
-      batch.push(parsed.data);
+      // 3. Setup event listeners on the papaStream
+      papaStream.on("data", async (row) => {
+        const parsed = UserDormitorySchema.safeParse(row);
 
-      if (batch.length >= BATCH_SIZE) {
-        const result = await processBatchOptimized(batch);
-        processedCount += result.processed;
-        errorCount += result.errors.length;
-        errors.push(...result.errors);
-        batch = [];
-      }
-    }
+        if (!parsed.success) {
+          errors.push(`Format error: ${JSON.stringify(row)}`);
+          errorCount++;
+          return;
+        }
+
+        batch.push(parsed.data);
+
+        if (batch.length >= BATCH_SIZE) {
+          nodeStream.pause(); // Pause the source stream
+          const result = await processBatchOptimized(batch);
+          processedCount += result.processed;
+          errorCount += result.errors.length;
+          errors.push(...result.errors);
+          batch = [];
+          nodeStream.resume(); // Resume source stream
+        }
+      });
+
+      papaStream.on("error", (err) => reject(err));
+      papaStream.on("finish", () => resolve());
+
+      // 4. Pipe the converted node stream into PapaParse
+      nodeStream.pipe(papaStream);
+    });
 
     if (batch.length > 0) {
       const result = await processBatchOptimized(batch);
@@ -83,21 +98,21 @@ export async function POST(request: NextRequest) {
 async function processBatchOptimized(rows: UserDormitoryInput[]) {
   const errors: string[] = [];
 
-  const universityIds = rows.map((r) => r.studentId);
-  const blockNames = [...new Set(rows.map((r) => r.block))];
+  const universityIds = rows.map((r) => r.studentId.trim().toLowerCase());
+  const blockNames = [
+    ...new Set(rows.map((r) => r.block.trim().toUpperCase())),
+  ];
 
   const users = await prisma.user.findMany({
-    where: { universityId: { in: universityIds, mode: "insensitive" } },
+    where: { universityId: { in: universityIds } },
     select: { id: true, universityId: true },
   });
 
-  const userMap = new Map(
-    users.map((u) => [u.universityId.toLowerCase(), u.id]),
-  );
+  const userMap = new Map(users.map((u) => [u.universityId, u.id]));
 
   const dorms = await prisma.dormitory.findMany({
     where: {
-      block: { name: { in: blockNames, mode: "insensitive" } },
+      block: { name: { in: blockNames } },
     },
     include: { block: true },
   });
@@ -111,16 +126,20 @@ async function processBatchOptimized(rows: UserDormitoryInput[]) {
   const validDormIds = [];
 
   for (const row of rows) {
-    const userId = userMap.get(row.studentId.toLowerCase());
+    const studentIdKey = row.studentId.trim().toLowerCase();
+    const userId = userMap.get(studentIdKey);
+
     if (!userId) {
       errors.push(`User not found: ${row.studentId}`);
       continue;
     }
 
-    const dormId = dormMap.get(`${row.block.toUpperCase()}:${row.dormNumber}`);
+    const dormKey = `${row.block.trim().toUpperCase()}:${row.dormNumber}`;
+    const dormId = dormMap.get(dormKey);
+
     if (!dormId) {
       errors.push(
-        `Dorm not found: ${row.block.toUpperCase()}-${row.dormNumber}`,
+        `Dorm not found: Block "${row.block}" Number ${row.dormNumber}`,
       );
       continue;
     }
