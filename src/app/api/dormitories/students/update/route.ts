@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
     let errorCount = 0;
     const errors: string[] = [];
 
+    let activeWork: Promise<any> = Promise.resolve();
+
     const nodeStream = Readable.fromWeb(file.stream() as any);
 
     await new Promise<void>((resolve, reject) => {
@@ -60,17 +62,26 @@ export async function POST(request: NextRequest) {
 
         if (batch.length >= BATCH_SIZE) {
           nodeStream.pause(); // Pause the source stream
-          const result = await processBatchOptimized(batch);
-          processedCount += result.processed;
-          errorCount += result.errors.length;
-          errors.push(...result.errors);
+          const currentBatch = [...batch];
           batch = [];
-          nodeStream.resume(); // Resume source stream
+
+          // Chain the promise to ensure sequential processing
+          activeWork = activeWork
+            .then(async () => {
+              const result = await processBatchOptimized(currentBatch);
+              processedCount += result.processed;
+              errorCount += result.errors.length;
+              errors.push(...result.errors);
+              nodeStream.resume();
+            })
+            .catch(reject);
         }
       });
 
       papaStream.on("error", (err) => reject(err));
-      papaStream.on("finish", () => resolve());
+      papaStream.on("finish", () => {
+        activeWork.then(() => resolve());
+      });
 
       // 4. Pipe the converted node stream into PapaParse
       nodeStream.pipe(papaStream);
