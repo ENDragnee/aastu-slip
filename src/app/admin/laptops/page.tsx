@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Laptop2, Plus, Loader2, Search, RefreshCw } from "lucide-react";
+import { Laptop2, Plus, Loader2, Search, RefreshCw, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchAdminLaptops } from "@/lib/api/admin-laptops";
@@ -10,12 +10,15 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ErrorModal } from "@/components/modals/error-modal";
 import { LaptopsTable } from "@/components/admin/laptops/laptops-table";
 import { LaptopFormModal } from "@/components/admin/laptops/laptop-form-modal";
+import { LaptopBatchModal } from "@/components/admin/laptops/laptop-batch-modal"; // Import new modal
 import { AdminLaptop } from "@/types/admin";
 
 export default function AdminLaptopsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false); // State for batch modal
   const [editingLaptop, setEditingLaptop] = useState<AdminLaptop | null>(null);
 
   const limit = 10;
@@ -33,12 +36,12 @@ export default function AdminLaptopsPage() {
 
   const handleEdit = (laptop: AdminLaptop) => {
     setEditingLaptop(laptop);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
 
   const handleCreate = () => {
     setEditingLaptop(null);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
 
   const hasMore = (laptops?.length || 0) === limit;
@@ -56,6 +59,11 @@ export default function AdminLaptopsPage() {
           <p className="text-muted-foreground">Manage student electronic devices.</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
+          {/* Batch Upload Button */}
+          <Button variant="outline" onClick={() => setIsBatchModalOpen(true)} className="w-full md:w-auto">
+            <UploadCloud className="mr-2 h-4 w-4" /> Bulk Upload
+          </Button>
+
           <Button onClick={handleCreate} className="w-full md:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Register Laptop
           </Button>
@@ -99,11 +107,17 @@ export default function AdminLaptopsPage() {
         </>
       )}
 
-      {/* Create/Edit Modal */}
+      {/* Single Entry Modal */}
       <LaptopFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
         initialData={editingLaptop}
+      />
+
+      {/* Batch Upload Modal */}
+      <LaptopBatchModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
       />
 
       <ErrorModal
