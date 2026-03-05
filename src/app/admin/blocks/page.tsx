@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Building, Plus, Loader2, Search, RefreshCw } from "lucide-react";
+import { Building, Plus, Loader2, Search, RefreshCw, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBlocks } from "@/lib/api/blocks";
@@ -10,12 +10,14 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ErrorModal } from "@/components/modals/error-modal";
 import { BlocksTable } from "@/components/admin/blocks/blocks-table";
 import { BlockFormModal } from "@/components/admin/blocks/block-form-modal";
+import { BlockBatchModal } from "@/components/admin/blocks/block-batch-modal"; // New
 import { Block } from "@/types/admin";
 
 export default function AdminBlocksPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false); // Batch state
   const [editingBlock, setEditingBlock] = useState<Block | null>(null);
 
   const limit = 10;
@@ -33,12 +35,12 @@ export default function AdminBlocksPage() {
 
   const handleEdit = (block: Block) => {
     setEditingBlock(block);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
 
   const handleCreate = () => {
     setEditingBlock(null);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
 
   const hasMore = (blocks?.length || 0) === limit;
@@ -56,6 +58,9 @@ export default function AdminBlocksPage() {
           <p className="text-muted-foreground">Configure campus buildings and infrastructure.</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
+          <Button variant="outline" onClick={() => setIsBatchModalOpen(true)} className="w-full md:w-auto">
+            <UploadCloud className="mr-2 h-4 w-4" /> Bulk Upload
+          </Button>
           <Button onClick={handleCreate} className="w-full md:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Add Block
           </Button>
@@ -99,11 +104,16 @@ export default function AdminBlocksPage() {
         </>
       )}
 
-      {/* Create/Edit Modal */}
+      {/* Modals */}
       <BlockFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
         initialData={editingBlock}
+      />
+
+      <BlockBatchModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
       />
 
       <ErrorModal
