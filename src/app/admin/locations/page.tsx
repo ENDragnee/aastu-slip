@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Plus, Loader2, RefreshCw } from "lucide-react";
+import { MapPin, Plus, Loader2, RefreshCw, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchLocations } from "@/lib/api/locations";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ErrorModal } from "@/components/modals/error-modal";
 import { LocationsTable } from "@/components/admin/locations/locations-table";
 import { LocationFormModal } from "@/components/admin/locations/location-form-modal";
+import { LocationBatchModal } from "@/components/admin/locations/location-batch-modal"; // ✅ Imported
 import { Location } from "@/types/admin";
 
 export default function AdminLocationsPage() {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false); // ✅ Batch state
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
 
   const limit = 10;
@@ -52,6 +54,10 @@ export default function AdminLocationsPage() {
           <Button variant="outline" size="icon" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
+          {/* ✅ Batch Upload Button */}
+          <Button variant="outline" onClick={() => setIsBatchModalOpen(true)} className="w-full md:w-auto">
+            <UploadCloud className="mr-2 h-4 w-4" /> Bulk Upload
+          </Button>
           <Button onClick={handleCreate} className="w-full md:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Add Location
           </Button>
@@ -84,6 +90,12 @@ export default function AdminLocationsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={editingLocation}
+      />
+
+      {/* ✅ Batch Modal */}
+      <LocationBatchModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
       />
 
       <ErrorModal
