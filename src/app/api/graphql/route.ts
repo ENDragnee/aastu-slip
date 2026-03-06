@@ -1,5 +1,6 @@
 import { createSchema, createYoga } from "graphql-yoga";
 import { adminDashboard } from "@/lib/api/graphql/admin";
+import { NextRequest } from "next/server";
 
 const schema = createSchema({
   typeDefs: `
@@ -44,7 +45,7 @@ const schema = createSchema({
   },
 });
 
-const { handleRequest } = createYoga({
+const yoga = createYoga({
   schema,
   graphqlEndpoint: "/api/graphql",
   fetchAPI: {
@@ -53,4 +54,10 @@ const { handleRequest } = createYoga({
   },
 });
 
-export { handleRequest as GET, handleRequest as POST };
+export async function GET(request: NextRequest, context: any) {
+  return yoga.handleRequest(request, context);
+}
+
+export async function POST(request: NextRequest, context: any) {
+  return yoga.handleRequest(request, context);
+}
