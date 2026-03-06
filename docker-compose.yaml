@@ -63,7 +63,7 @@ services:
       - migrator
 
   worker:
-    image: mastwal/aastu-slip-app:1.1.2
+    image: mastwal/aastu-slip-app:1.1.3
     container_name: aastu_worker
     restart: unless-stopped
     env_file:
