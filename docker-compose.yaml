@@ -25,6 +25,20 @@ services:
     networks:
       - aastu_slip_managment_system_network
 
+  # Temporary container to sync the database schema
+  migrator:
+    image: mastwal/aastu-slip-app:1.1.2
+    container_name: aastu_migrator
+    env_file:
+      - .env.docker
+    # FIXED: Added the space after "command:"
+    command: ["npx", "prisma", "db", "push"]
+    depends_on:
+      - postgres
+    networks:
+      - aastu_slip_managment_system_network
+    restart: "no" # Runs once and exits
+
   nextjs_app:
     image: mastwal/aastu-slip-app:1.1.2
     build:
@@ -39,11 +53,14 @@ services:
     environment:
       - PORT=3000
       - HOSTNAME=0.0.0.0
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     networks:
       - aastu_slip_managment_system_network
     depends_on:
       - postgres
       - redis
+      - migrator
 
   worker:
     image: mastwal/aastu-slip-app:1.1.2
@@ -51,6 +68,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env.docker
+    # FIXED: Added the space after "command:"
     command: ["node", "dist/worker.js"]
     environment:
       - REDIS_HOST=redis
@@ -60,6 +78,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - migrator
 
 volumes:
   aastu_slip_managment_system_vol:
