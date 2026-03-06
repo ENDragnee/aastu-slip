@@ -1,4 +1,31 @@
 import { GateStatus, ExitStatus, DormStatus } from "@/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
+
+export interface User {
+  id: string;
+  name: string;
+  universityId: string;
+  email: string | null;
+  phoneNumber: string | null;
+  role: Role;
+  createdAt: string;
+}
+
+export interface UserFetchParams {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string;
+  role?: string;
+}
+
+export interface UserFormData {
+  name: string;
+  universityId: string;
+  email: string;
+  phoneNumber?: string;
+  role: Role;
+}
 
 export interface GateStat {
   id: string;

@@ -12,6 +12,7 @@ import {
   DoorOpen,
   Package,
   UploadCloud,
+  User,
 } from "lucide-react";
 import { Role } from "@/generated/prisma/enums";
 
@@ -113,6 +114,12 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Properties",
     href: "/admin/properties",
     icon: Package,
+    roles: [Role.ADMIN],
+  },
+  {
+    title: "Users",
+    href: "/admin/users",
+    icon: User,
     roles: [Role.ADMIN],
   },
 
