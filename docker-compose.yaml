@@ -16,6 +16,15 @@ services:
     networks:
       - aastu_slip_managment_system_network
 
+  redis:
+    image: redis:alpine
+    container_name: aastu_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - aastu_slip_managment_system_network
+
   nextjs_app:
     image: mastwal/aastu-slip-app:1.1.2
     build:
@@ -34,6 +43,23 @@ services:
       - aastu_slip_managment_system_network
     depends_on:
       - postgres
+      - redis
+
+  worker:
+    image: mastwal/aastu-slip-app:1.1.2
+    container_name: aastu_worker
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    command: ["node", "dist/worker.js"]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - aastu_slip_managment_system_network
+    depends_on:
+      - postgres
+      - redis
 
 volumes:
   aastu_slip_managment_system_vol:
