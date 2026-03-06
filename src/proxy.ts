@@ -5,6 +5,7 @@ const publicUrls = [
   "/",
   "/auth/sign-in",
   "/auth/sign-up",
+  "/auth/onboarding",
   "/contact-us",
   "/about-us",
 ];
